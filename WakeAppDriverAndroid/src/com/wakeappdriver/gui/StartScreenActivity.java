@@ -1,4 +1,6 @@
-package com.wakeappdriver.wakeappdriver;
+package com.wakeappdriver.gui;
+
+import com.wakeappdriver.wakeappdriver.R;
 
 import android.os.Bundle;
 import android.app.Activity;
