@@ -14,7 +14,7 @@ public class CameraTask implements Runnable {
 		this.queueManager = queueManager;
 		camera = Camera.open(1);
 	}
-	
+
 	@Override
 	public void run() {
 		while(true){
@@ -24,6 +24,9 @@ public class CameraTask implements Runnable {
 				e.printStackTrace();
 				return;
 			}
+			//take picture
+			queueManager.waitForAnalyzer();
+			
 		}
 	}
 }

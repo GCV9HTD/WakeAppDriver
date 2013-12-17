@@ -8,4 +8,8 @@ public class FrameQueue {
 	int maxCapacity;
 	int micCapacity;
 	FrameQueueManager queueManager;
+	
+	public CapturedFrame poll(){
+		return frames.poll();
+	}
 }

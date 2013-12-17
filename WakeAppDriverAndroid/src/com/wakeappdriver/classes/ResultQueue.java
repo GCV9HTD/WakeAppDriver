@@ -24,5 +24,9 @@ public class ResultQueue {
 		}
 		return currentResults;
 	}
+	
+	public void add(FrameAnalyzerResult result){
+		this.results.add(result);
+	}
 }
 

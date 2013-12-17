@@ -2,9 +2,9 @@ package com.wakeappdriver.stubs;
 
 import java.util.Queue;
 
+import com.wakeappdriver.classes.FrameAnalyzer;
 import com.wakeappdriver.classes.FrameAnalyzerResult;
 import com.wakeappdriver.classes.FrameQueue;
-import com.wakeappdriver.interfaces.FrameAnalyzer;
 
 public class StubFrameAnalyzer implements FrameAnalyzer {
 

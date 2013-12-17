@@ -1,6 +1,12 @@
 package com.wakeappdriver.classes;
 
 public class FrameAnalyzerResult {
-	double score;
+	Double value;
 	long timestamp;
+	
+	public FrameAnalyzerResult(Double value, long timestamp){
+		this.value = value;
+		this.timestamp = timestamp;
+	}
+	
 }
