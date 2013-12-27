@@ -6,5 +6,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="goButton">Go!</string>
     <string name="title_activity_settings">SettingsActivity</string>
+    <string name="title_activity_tracker">TrackerActivity</string>
 
 </resources>

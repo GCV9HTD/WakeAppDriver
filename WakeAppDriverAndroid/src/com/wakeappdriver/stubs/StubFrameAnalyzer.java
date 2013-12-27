@@ -2,17 +2,13 @@ package com.wakeappdriver.stubs;
 
 import java.util.Queue;
 
+import org.opencv.core.Mat;
+
 import com.wakeappdriver.classes.FrameAnalyzer;
 import com.wakeappdriver.classes.FrameAnalyzerResult;
 import com.wakeappdriver.classes.FrameQueue;
 
-public class StubFrameAnalyzer implements FrameAnalyzer {
-
-	@Override
-	public void registerIncomingQueue(FrameQueue frameQueue) {
-		// TODO Auto-generated method stub
-		
-	}
+public class StubFrameAnalyzer extends FrameAnalyzer {
 
 	@Override
 	public void run() {
@@ -21,9 +17,8 @@ public class StubFrameAnalyzer implements FrameAnalyzer {
 	}
 
 	@Override
-	public void registerOutgoingQueue(Queue<FrameAnalyzerResult> queue) {
-		// TODO Auto-generated method stub
-		
+	public double analyze(Mat rawData) {
+		return 0;
 	}
 
 }

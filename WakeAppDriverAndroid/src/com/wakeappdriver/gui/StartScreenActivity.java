@@ -26,5 +26,10 @@ public class StartScreenActivity extends Activity {
 	    Intent intent = new Intent(this, SettingsActivity.class);
 	    startActivity(intent);
 	}
+	
+	public void startTracking(View view) {
+	    Intent intent = new Intent(this, TrackerActivity.class);
+	    startActivity(intent);		
+	}
 
 }

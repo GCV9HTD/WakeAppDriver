@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Queue;
 
 import com.wakeappdriver.classes.FrameAnalyzerResult;
+import com.wakeappdriver.enums.FrameAnalyzerType;
 import com.wakeappdriver.interfaces.Indicator;
 
 public class StubIndicator implements Indicator{
@@ -18,6 +19,12 @@ public class StubIndicator implements Indicator{
 	public void calculate(Queue<FrameAnalyzerResult> results) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public boolean interested(FrameAnalyzerType type) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }
