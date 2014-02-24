@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.wakeappdriver.wakeappdriver"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="14"
+        android:targetSdkVersion="19" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.front"
+        android:required="false" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
+        
+        <activity
+            android:name="com.wakeappdriver.gui.StartScreenActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="landscape"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.wakeappdriver.gui.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName="com.wakeappdriver.gui.StartScreenActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.wakeappdriver.wakeappdriver.StartScreenActivity" />
+        </activity>
+        <activity
+            android:name="com.wakeappdriver.gui.StartScreenCvListener"
+            android:label="@string/title_activity_start_screen_cv_listener" 
+            android:screenOrientation="landscape"
+            android:configChanges="keyboardHidden|orientation"
+            >
+        </activity>
+        <activity
+            android:name="com.wakeappdriver.gui.CameraViewListenerActivty"
+            android:label="@string/title_activity_camera_view_listener_activty"
+            android:parentActivityName="com.wakeappdriver.gui.StartScreenActivity" 
+            android:screenOrientation="landscape"
+			android:configChanges="keyboardHidden|orientation">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.wakeappdriver.gui.StartScreenActivity" />
+        </activity>
+    </application>
+
+</manifest>
