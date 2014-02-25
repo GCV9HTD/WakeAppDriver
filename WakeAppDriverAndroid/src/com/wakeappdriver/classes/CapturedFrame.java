@@ -28,5 +28,10 @@ public class CapturedFrame implements CvCameraViewFrame{
 		//return mCapture.retrieve(mGray, Highgui.CV_CAP_ANDROID_GREY_FRAME);
 		return this.gray;
 	}
+	
+	public void destroy() {
+		rgba.release();
+		gray.release();
+	}
 
 }

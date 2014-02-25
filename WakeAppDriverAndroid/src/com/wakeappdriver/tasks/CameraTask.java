@@ -15,7 +15,7 @@ import com.wakeappdriver.classes.FrameQueueManager;
 
 public class CameraTask implements Runnable {
 	/** tag for logging*/
-	public static final String TAG = "wad";
+	public static final String TAG = "WAD";
 
 	/** queueManager for handling received frames*/
 	private FrameQueueManager queueManager;

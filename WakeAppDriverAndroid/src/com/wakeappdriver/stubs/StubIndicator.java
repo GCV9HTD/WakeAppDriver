@@ -8,7 +8,7 @@ import com.wakeappdriver.enums.FrameAnalyzerType;
 import com.wakeappdriver.interfaces.Indicator;
 
 public class StubIndicator implements Indicator{
-    private static final String TAG = "AWD";
+    private static final String TAG = "WAD";
 
 	private double value;
 	

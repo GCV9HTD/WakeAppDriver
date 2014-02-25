@@ -1,16 +1,15 @@
 package com.wakeappdriver.stubs;
 
-import org.opencv.core.Mat;
-
 import android.util.Log;
 
+import com.wakeappdriver.classes.CapturedFrame;
 import com.wakeappdriver.classes.FrameAnalyzer;
 import com.wakeappdriver.classes.FrameQueue;
 import com.wakeappdriver.classes.FrameQueueManager;
 import com.wakeappdriver.classes.ResultQueue;
 
 public class StubFrameAnalyzer extends FrameAnalyzer {
-    private static final String TAG = "AWD";
+    private static final String TAG = "WAD";
 
 	public StubFrameAnalyzer(FrameQueueManager queueManager,
 			FrameQueue frameQueue, ResultQueue resultQueue) {
@@ -19,9 +18,9 @@ public class StubFrameAnalyzer extends FrameAnalyzer {
 
 	}
 
-	public double analyze(Mat mat) {
+	public Double analyze(CapturedFrame capturedFrame) {
 		Log.d(TAG, Thread.currentThread().getName() + "analyzing!");
 
-		return 0;
+		return (double) 0;
 	}
 }

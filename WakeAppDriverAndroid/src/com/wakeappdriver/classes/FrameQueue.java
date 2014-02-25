@@ -8,31 +8,31 @@ import com.wakeappdriver.enums.FrameQueueType;
 import android.util.Log;
 
 public class FrameQueue {
-    private static final String TAG = "AWD";
+    private static final String TAG = "WAD";
     private Queue<CapturedFrame> frames;
     private FrameQueueType type;
     private int maxCapacity;	
 	
 	public FrameQueue(int maxCapacity, FrameQueueType type){
-		Log.d(TAG, Thread.currentThread().getName() + "::creating frame queue: capacity " + maxCapacity + ", type "+ type.name());
+		Log.d(TAG, Thread.currentThread().getName() + " :: creating frame queue: capacity " + maxCapacity + ", type "+ type.name());
 		this.maxCapacity = maxCapacity;
 		this.type = type;
 		this.frames = new ArrayDeque<CapturedFrame>();
 	}
 	public CapturedFrame remove(){
 		CapturedFrame frame = this.frames.remove();
-		Log.d(TAG, Thread.currentThread().getName() + "::removing frame from queue: new size " + this.frames.size());
+		Log.d(TAG, Thread.currentThread().getName() + " :: removing frame from queue: new size " + this.frames.size());
 		return frame;
 	}
 
 	public boolean tryAdd(CapturedFrame frame){
 		if(!isFull()){
 			this.frames.add(frame);
-			Log.d(TAG, Thread.currentThread().getName() + "::add new frame to queue " +  this.type.name() + ", new size " + this.frames.size());
+			Log.d(TAG, Thread.currentThread().getName() + " :: add new frame to queue " +  this.type.name() + ", new size " + this.frames.size());
 
 			return true;
 		}
-		Log.d(TAG, Thread.currentThread().getName() + "::cannot add to frame queue, queue is full");
+		Log.d(TAG, Thread.currentThread().getName() + " :: cannot add to frame queue, queue is full");
 		return false;
 	}
 

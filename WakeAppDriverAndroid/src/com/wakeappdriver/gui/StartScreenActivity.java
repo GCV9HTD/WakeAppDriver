@@ -5,7 +5,7 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
 import com.wakeappdriver.tasks.CameraTask;
-import com.wakeappdriver.wakeappdriver.R;
+import com.wakeappdriver.R;
 
 import android.os.Bundle;
 import android.app.Activity;
@@ -15,7 +15,7 @@ import android.view.Menu;
 import android.view.View;
 
 public class StartScreenActivity extends Activity {
-	private static final String TAG = "awd";
+	private static final String TAG = "WAD";
 	private boolean DrawImage = true;
 
 	private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {

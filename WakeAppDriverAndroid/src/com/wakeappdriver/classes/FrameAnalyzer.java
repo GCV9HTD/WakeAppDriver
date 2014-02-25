@@ -1,18 +1,15 @@
 package com.wakeappdriver.classes;
 
-import java.util.Queue;
-
-import org.opencv.core.Mat;
-
 import android.util.Log;
+
 public abstract class FrameAnalyzer implements Runnable{
-    private static final String TAG = "AWD";
+    private static final String TAG = "WAD";
 
 	private FrameQueue frameQueue;
 	private ResultQueue resultQueue;
 	private FrameQueueManager queueManager;
 	
-	public abstract double analyze(Mat mat);
+	public abstract Double analyze(CapturedFrame capturedFrame);
 	
 	public FrameAnalyzer(FrameQueueManager queueManager, FrameQueue frameQueue,ResultQueue resultQueue){
 		this.frameQueue = frameQueue;
@@ -22,15 +19,21 @@ public abstract class FrameAnalyzer implements Runnable{
 	
 	@Override
 	public void run() {
-		Log.d(TAG, Thread.currentThread().getName() + "::starting frame analyzer ");
+		Log.d(TAG, Thread.currentThread().getName() + " :: starting frame analyzer ");
 
 		Double value = null;
-		while(true){
+		while(queueManager.isAlive()){
 			CapturedFrame capturedFrame = queueManager.PopFrame(frameQueue);
-			value = this.analyze(capturedFrame.gray());
-			this.resultQueue.add(new FrameAnalyzerResult(value, capturedFrame.getTimestamp()));
-			
+			value = this.analyze(capturedFrame);
+			FrameAnalyzerResult frameResult = new FrameAnalyzerResult(value, capturedFrame.getTimestamp());
+			this.resultQueue.add(frameResult);
+			this.logFrameResult(frameResult);
+			capturedFrame.destroy();
 		}
+	}
+	
+	protected void logFrameResult(FrameAnalyzerResult frameResult) {
+		Log.v(TAG, Thread.currentThread().getName() + " :: Result: " + frameResult.getTimestamp() + " " + frameResult.getValue());
 	}
 
 }
