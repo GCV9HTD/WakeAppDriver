@@ -32,7 +32,7 @@ public class ResultQueue {
 	public synchronized void add(FrameAnalyzerResult result){
 		if(this.results.size() < 100){			
 			this.results.add(result);
-			Log.d(TAG, Thread.currentThread().getName() + " :: adding result to queue " + this.type.name()+ ", new size :"+ results.size());
+			Log.d(TAG, Thread.currentThread().getName() + " :: adding result " + result.getValue() + " at " + result.getTimestamp() + " to queue " + this.type.name()+ ", new size :"+ results.size());
 		}
 	}
 }

@@ -23,10 +23,10 @@ public class PerclosIndicator implements Indicator{
 
 	@Override
 	public void calculate(Queue<FrameAnalyzerResult> results) {
-		int sum = 0;
+		double sum = 0;
 		int count = 0;
 		for (FrameAnalyzerResult result : results) {
-			if (result.getValue() != null) {
+			if (result.getValue() != null && !result.getValue().isInfinite() && !result.getValue().isNaN()) {
 				count++;
 				sum += result.getValue();
 			}
@@ -37,7 +37,7 @@ public class PerclosIndicator implements Indicator{
 		else {
 			value = sum / count;
 		}
-		Log.d(TAG, Thread.currentThread().getName() + " :: calculated PERCLOS");
+		Log.d(TAG, Thread.currentThread().getName() + " :: calculated PERCLOS: " + value + ", sum = " + sum +", count = " + count);
 	}
 
 	@Override

@@ -255,6 +255,8 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 		
 		double width = right - left;
 		double height = top - down;
+		Log.d(TAG, Thread.currentThread().getName() + " :: Height = " + height);
+
 		double ratio = height / (width);
 		if(mode.equals(OperationMode.VISUAL_MODE) && ratio > 0.33){ // no blink, draw red lines
 			Core.line(toDisplayRgba, new Point(left,midRow), new Point(right,midRow), new Scalar(255,0,0));
