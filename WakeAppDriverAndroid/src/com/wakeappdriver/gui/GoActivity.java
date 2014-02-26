@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,8 +22,10 @@ import com.wakeappdriver.classes.CapturedFrame;
 import com.wakeappdriver.classes.FrameAnalyzer;
 import com.wakeappdriver.classes.FrameQueue;
 import com.wakeappdriver.classes.FrameQueueManager;
+import com.wakeappdriver.classes.NoIdentificationAlerter;
 import com.wakeappdriver.classes.ResultQueue;
 import com.wakeappdriver.classes.WindowAnalyzer;
+import com.wakeappdriver.configuration.ConfigurationParameters;
 import com.wakeappdriver.enums.FrameAnalyzerType;
 import com.wakeappdriver.enums.FrameQueueType;
 import com.wakeappdriver.enums.IndicatorType;
@@ -47,12 +50,10 @@ import android.view.Menu;
 import android.view.WindowManager;
 
 
-public class CameraViewListenerActivty extends Activity implements CvCameraViewListener2 {
+public class GoActivity extends Activity implements CvCameraViewListener2 {
 	private static final String TAG = "WAD";
 
 	private CameraBridgeViewBase   mOpenCvCameraView;
-
-	private PercentCoveredFrameAnalyzer visualFrameAnalyzer;	// only for debugging
 
 	private CascadeClassifier mFaceDetector;
 	private CascadeClassifier mRightEyeDetector;
@@ -148,16 +149,14 @@ public class CameraViewListenerActivty extends Activity implements CvCameraViewL
 		// Show the Up button in the action bar.
 
 		Resources res = getResources();
-		SharedPreferences config = this.getSharedPreferences(res.getString(R.string.awd_config_fname), MODE_PRIVATE);
+		ConfigurationParameters params = new ConfigurationParameters(this);
 
-		this.init(config); //initialize WAD data structures
+		this.init(params); //initialize WAD data structures
 		
 		Thread.currentThread().setName("CameraThread");
 
-//		boolean nativeCam = false;
-		boolean nativeCam = config.getBoolean(res.getString(R.string.awd_config_native_cam_key), false);
 		//java camera view works alot faster than native camera view
-		if(nativeCam){
+		if(params.getCameraMode()){
 			mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.native_camera_surface_view);
 		} else {
 			mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.java_camera_surface_view);
@@ -249,20 +248,13 @@ public class CameraViewListenerActivty extends Activity implements CvCameraViewL
 		Long timestamp = System.nanoTime();
 		queueManager.putFrame(new CapturedFrame(timestamp, rgba, gray));
 		return rgba;
-
-		// For Debugging - use visual analyze:
-/*		if(visualFrameAnalyzer == null) {
-			this.visualFrameAnalyzer = new PercentCoveredFrameAnalyzer(mFaceDetector, mRightEyeDetector);
-		}
-		return this.visualFrameAnalyzer.visualAnalyze(new CapturedFrame(timestamp, rgba, gray));*/
 	}
 
 
 	//init data structures
-	private void init(SharedPreferences config){
+	private void init(ConfigurationParameters params){
 		
-		
-		FrameQueue frameQueue1 = new FrameQueue(10,FrameQueueType.PERCENT_COVERED_QUEUE);
+		FrameQueue frameQueue1 = new FrameQueue(params.getMaxFrameQueueSize(),FrameQueueType.PERCENT_COVERED_QUEUE);
 //		FrameQueue frameQueue2 = new FrameQueue(10,FrameQueueType.HEAD_INCLINATION_QUEUE);
 //		FrameQueue frameQueue3 = new FrameQueue(10,FrameQueueType.YAWN_SIZE_QUEUE);
 
@@ -288,7 +280,7 @@ public class CameraViewListenerActivty extends Activity implements CvCameraViewL
 		this.frameAnalyzers = new ArrayList<FrameAnalyzer>();
 		this.frameAnalyzers.add(frameAnalyzer1);
 
-		Indicator indicator1 = new PerclosIndicator(0);
+		Indicator indicator1 = new PerclosIndicator();
 //		Indicator indicator2 = new StubIndicator(5);
 //		Indicator indicator3 = new StubIndicator(7);
 
@@ -305,13 +297,27 @@ public class CameraViewListenerActivty extends Activity implements CvCameraViewL
 			t.start();
 		}
 
-		Resources res = getResources();
-		double alertThreshold = config.getFloat(res.getString(R.string.awd_config_threshold_key), (float) 0.66);
-		int windowSize = config.getInt(res.getString(R.string.awd_config_window_sizw_key), 10000);
-		Alerter alerter = new SimpleAlerter(this);
+		double alertThreshold = params.getAlertThreshold();
+		int windowSize = params.getWindowSize();
+
+		Alerter alerter;
+		try {
+		Class<?> clazz = Class.forName(params.getAlertType());
+		Constructor<?> constructor = clazz.getConstructor(Context.class);
+		alerter = (Alerter)(constructor.newInstance(this));
+		} catch (Exception e) {
+			alerter = new SimpleAlerter(this);
+		}
+
+		Alerter noIdenAlerter = new NoIdentificationAlerter(this);
 		WindowAnalyzer windowAnalyzer = new WindowAnalyzer(resultQueueList, indicatorList);
 		Predictor predictor = new WakeAppPredictor();
-		this.detector = new DetectorTask(alerter, windowAnalyzer, predictor, alertThreshold, windowSize);
+		
+		int learningModeDuration = params.getLearningModeDuration();
+		int durationBetweenAlerts = params.getDurationBetweenAlerts();
+		
+		this.detector = new DetectorTask(alerter, windowAnalyzer, predictor, alertThreshold, windowSize, noIdenAlerter,
+				learningModeDuration, durationBetweenAlerts);
 
 		this.detectionTask = new Thread(this.detector);
 		detectionTask.setName("DetectionTask");

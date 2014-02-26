@@ -51,7 +51,7 @@ public class StartScreenActivity extends Activity {
 		Log.d(TAG, "entering");
 
 		if(DrawImage){	
-			Intent intent = new Intent(this, CameraViewListenerActivty.class);
+			Intent intent = new Intent(this, GoActivity.class);
 			startActivity(intent);
 		} else {
 

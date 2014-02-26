@@ -1,5 +1,7 @@
 package com.wakeappdriver.classes;
 
+import org.opencv.core.Mat;
+
 import android.util.Log;
 
 public abstract class FrameAnalyzer implements Runnable{
@@ -10,6 +12,7 @@ public abstract class FrameAnalyzer implements Runnable{
 	private FrameQueueManager queueManager;
 	
 	public abstract Double analyze(CapturedFrame capturedFrame);
+	public abstract Mat visualAnalyze(CapturedFrame capturedFrame);	// debugging method
 	
 	public FrameAnalyzer(FrameQueueManager queueManager, FrameQueue frameQueue,ResultQueue resultQueue){
 		this.frameQueue = frameQueue;

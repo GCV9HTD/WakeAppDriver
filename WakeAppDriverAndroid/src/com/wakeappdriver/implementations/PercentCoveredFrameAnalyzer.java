@@ -38,6 +38,9 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 	private float mRelativeFaceSize = 0.2f;
 	private int mAbsoluteFaceSize = 0;
 	
+	private double maxHeight = 0;
+	private double minHeight = 100;
+	
 	public PercentCoveredFrameAnalyzer(FrameQueueManager queueManager,
 			FrameQueue frameQueue, ResultQueue resultQueue) {
 		super(queueManager, frameQueue, resultQueue);
@@ -214,30 +217,11 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 
 	private double getIrisSize(Mat toDisplayGray, Mat toDisplayRgba, OperationMode mode) {
 
-		int midRow = (toDisplayGray.rows()/2)-3;
 		int midCol = toDisplayGray.cols()/2;
-		double startCountImgPercent = 0.3;
-		double endCountImagePercent = 0.7;
 
 		//last black pixel indices in edges (left right top bottom)
-		int left = 0;
-		int right = 0;
 		int top = 0;
 		int down = 0;
-
-		//count black pixels from left to right in the middle row
-		for(int i = (int)(toDisplayGray.cols()*startCountImgPercent); i < toDisplayGray.cols()*endCountImagePercent; i++){
-			//if value is 0 -> black pixel
-			if(toDisplayGray.get(midRow, i)[0] == 0){
-				if(left == 0){ 
-					left = i;
-					right = i;
-				} 
-				else {
-					right = i;
-				}
-			}
-		}
 
 		//count black pixels from top to bottom in the middle column
 		for(int i = 0; i < toDisplayGray.rows(); i++){
@@ -253,13 +237,21 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 			}
 		}
 		
-		double width = right - left;
 		double height = top - down;
-		Log.d(TAG, Thread.currentThread().getName() + " :: Height = " + height);
+		
+		if (height > maxHeight)
+			maxHeight = height;
+		
+		if (height < minHeight)
+			minHeight = height;
 
-		double ratio = height / (width);
-		if(mode.equals(OperationMode.VISUAL_MODE) && ratio > 0.33){ // no blink, draw red lines
-			Core.line(toDisplayRgba, new Point(left,midRow), new Point(right,midRow), new Scalar(255,0,0));
+		double ratio = (height-minHeight) / (maxHeight-minHeight);
+		Log.d(TAG, Thread.currentThread().getName() + " :: Height = " + height);
+		Log.d(TAG, Thread.currentThread().getName() + " :: maxHeight = " + maxHeight);
+		Log.d(TAG, Thread.currentThread().getName() + " :: minHeight = " + minHeight);
+		Log.d(TAG, Thread.currentThread().getName() + " :: Ratio = " + ratio);
+
+		if(mode.equals(OperationMode.VISUAL_MODE)){ // no blink, draw red line
 			Core.line(toDisplayRgba, new Point(midCol,down), new Point(midCol,top), new Scalar(255,0,0));
 		}
 		
@@ -299,10 +291,12 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 			Mat mROI = mGray.submat(area);
 			MatOfRect eyes = new MatOfRect();
 			clasificator.detectMultiScale(mROI, eyes, 1.15, 2,
-					Objdetect.CASCADE_FIND_BIGGEST_OBJECT
-					| Objdetect.CASCADE_SCALE_IMAGE, new Size(10, 10),
+					Objdetect.CASCADE_SCALE_IMAGE, new Size(10, 10),
 					new Size());
 
+			if(eyes.toArray().length == 0) {
+				return null;
+			}
 			Rect e = eyes.toArray()[0];
 			e.x = area.x + e.x;
 			e.y = area.y + e.y;

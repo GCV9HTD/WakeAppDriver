@@ -8,5 +8,5 @@ import com.wakeappdriver.enums.IndicatorType;
 
 public interface Predictor {
 
-	public double predictDrowsiness(HashMap<IndicatorType,Indicator> indicators);
+	public Double predictDrowsiness(HashMap<IndicatorType,Indicator> indicators);
 }

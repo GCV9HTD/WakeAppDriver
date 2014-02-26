@@ -1,4 +1,4 @@
-package com.wakeappdriver.implementations;
+package com.wakeappdriver.classes;
 
 import java.util.Locale;
 
@@ -9,14 +9,14 @@ import android.util.Log;
 
 import com.wakeappdriver.interfaces.Alerter;
 
-public class SimpleAlerter implements Alerter, OnInitListener{
+public class NoIdentificationAlerter implements Alerter, OnInitListener{
 	
 	public static String TAG = "WAD";
 	
 	private TextToSpeech tts;
 	
-	public SimpleAlerter(Activity currentActivity) {
-		Log.d(TAG, Thread.currentThread().getName() + " :: SimpleAlerter has been created");
+	public NoIdentificationAlerter(Activity currentActivity) {
+		Log.d(TAG, Thread.currentThread().getName() + " :: NoIdentificationAlerter has been created");
 		tts = new TextToSpeech(currentActivity, this);
 		tts.setLanguage(Locale.US);
 	}
@@ -24,12 +24,11 @@ public class SimpleAlerter implements Alerter, OnInitListener{
 	@Override
 	public void alert() {
 		Log.i(TAG, Thread.currentThread().getName() + " :: ALERT");
-		tts.speak("Hey, Wake Up, Driver!", TextToSpeech.QUEUE_FLUSH, null);
+		tts.speak("The system couldn't track you. Please set the smartphone again.", TextToSpeech.QUEUE_FLUSH, null);
 	}
 
 	@Override
 	public void onInit(int arg0) {
-		tts.speak("The system is tracking you now.", TextToSpeech.QUEUE_FLUSH, null);
 	}
 	
 	@Override

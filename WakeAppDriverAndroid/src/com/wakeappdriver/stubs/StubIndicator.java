@@ -1,6 +1,5 @@
 package com.wakeappdriver.stubs;
 
-import java.util.List;
 import java.util.Queue;
 
 import com.wakeappdriver.classes.FrameAnalyzerResult;
@@ -10,13 +9,13 @@ import com.wakeappdriver.interfaces.Indicator;
 public class StubIndicator implements Indicator{
     private static final String TAG = "WAD";
 
-	private double value;
+	private Double value = 0.0;
 	
 	public StubIndicator (double value){
 		this.value = value;
 	}
 	@Override
-	public double getValue() {
+	public Double getValue() {
 		return value;
 	}
 

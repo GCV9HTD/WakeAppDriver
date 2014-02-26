@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import android.util.Log;
 
+import com.wakeappdriver.classes.NoIdentificationAlerter;
 import com.wakeappdriver.classes.WindowAnalyzer;
 import com.wakeappdriver.enums.IndicatorType;
 import com.wakeappdriver.interfaces.Alerter;
@@ -13,31 +14,41 @@ import com.wakeappdriver.interfaces.Predictor;
 public class DetectorTask implements Runnable{
     private static final String TAG = "WAD";
 	
-	private WindowAnalyzer windowsAnalyzer;
+	private WindowAnalyzer windowAnalyzer;
 	private Alerter alerter;
 	private Predictor predictor;
 	private double alertThreshold;
 	private int windowSize;
+	private Alerter noIdenAlerter;
+	
+	private int learningModeDuration;
+	private int durationBetweenAlerts;
+	
+	private boolean alertMode = false;
 	private volatile boolean isAlive;
 	
 	public DetectorTask(Alerter alerter, WindowAnalyzer windowsAnalyzer, 
-			Predictor predictor, double alertThreshold, int windowSize ){
-		Log.i(TAG, Thread.currentThread().getName() + ":: starting Detector Task");
-		this.windowsAnalyzer = windowsAnalyzer;
+			Predictor predictor, double alertThreshold, int windowSize, Alerter noIdenAlerter,
+			int learningModeDuration, int durationBetweenAlerts){
+		Log.d(TAG, Thread.currentThread().getName() + ":: starting Detector Task");
+		this.windowAnalyzer = windowsAnalyzer;
 		this.alerter = alerter;
 		this.predictor = predictor;
 		this.alertThreshold = alertThreshold;
 		this.windowSize = windowSize;
 		this.isAlive = true;
+		this.noIdenAlerter = noIdenAlerter;
+		this.learningModeDuration = learningModeDuration;
+		this.durationBetweenAlerts = durationBetweenAlerts;
 	}
 	@Override
 	public void run() {	
-		Log.i(TAG, Thread.currentThread().getName() + ":: running Detector Task");
+		Log.d(TAG, Thread.currentThread().getName() + ":: running Detector Task");
 
 		HashMap<IndicatorType,Indicator> indicators = null;
-		double prediction = 0;
+		int windowsSinceLastAlert = 0;
+		Double prediction = 0.0;
 		while(isAlive){
-			Log.v(TAG, Thread.currentThread().getName() + ":: isAlive? " + isAlive);
 			//sleep for windowsize miliseconds
 			try {
 				Log.v(TAG, Thread.currentThread().getName() + ":: sleeping for " + windowSize + " ms");
@@ -53,18 +64,36 @@ public class DetectorTask implements Runnable{
 			//the predictor
 			Log.v(TAG, Thread.currentThread().getName() + ":: getting indicators");
 
-			indicators = this.windowsAnalyzer.calculateIndicators();
+			indicators = this.windowAnalyzer.calculateIndicators();
 
 			Log.v(TAG, Thread.currentThread().getName() + ":: predicting drowsiness");
 
 			prediction = predictor.predictDrowsiness(indicators);
 			
-			if (prediction > alertThreshold){
-				Log.i(TAG, Thread.currentThread().getName() + ":: reached threshhold! : " + prediction + " > " + alertThreshold);
-				//driver is sleepy -> alert him
-				alerter.alert();
-			} else {
-				Log.i(TAG, Thread.currentThread().getName() + ":: did not reach threshhold : " + prediction + " < " + alertThreshold);
+			if (alertMode) {
+				if (prediction == null) {	// system can't identify the driver
+					Log.i(TAG, Thread.currentThread().getName() + ":: did not recognize driver");
+					noIdenAlerter.alert();
+					this.alertMode = false;
+					windowsSinceLastAlert = this.durationBetweenAlerts;
+				}
+				else if (prediction > alertThreshold){	//driver is sleepy -> alert him
+					Log.i(TAG, Thread.currentThread().getName() + ":: reached threshhold! : " + prediction + " > " + alertThreshold);
+					alerter.alert();
+					this.alertMode = false;
+					windowsSinceLastAlert = this.durationBetweenAlerts;
+				} else {	// driver is aware
+					Log.i(TAG, Thread.currentThread().getName() + ":: did not reach threshhold : " + prediction + " < " + alertThreshold);
+				}
+			}
+			else {
+				if (learningModeDuration > 0)
+					learningModeDuration--;
+				else if (windowsSinceLastAlert > 0)
+					windowsSinceLastAlert--;
+				else {
+					alertMode = true;
+				}
 			}
 		}
 	}

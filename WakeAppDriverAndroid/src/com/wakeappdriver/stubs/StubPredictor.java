@@ -12,8 +12,8 @@ public class StubPredictor implements Predictor {
     private static final String TAG = "WAD";
 
 	@Override
-	public double predictDrowsiness(HashMap<IndicatorType,Indicator> indicators) {
-		return 1;
+	public Double predictDrowsiness(HashMap<IndicatorType,Indicator> indicators) {
+		return 1.0;
 	}
 
 }

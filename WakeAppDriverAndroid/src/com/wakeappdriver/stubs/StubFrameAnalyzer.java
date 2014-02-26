@@ -1,5 +1,7 @@
 package com.wakeappdriver.stubs;
 
+import org.opencv.core.Mat;
+
 import android.util.Log;
 
 import com.wakeappdriver.classes.CapturedFrame;
@@ -18,9 +20,16 @@ public class StubFrameAnalyzer extends FrameAnalyzer {
 
 	}
 
+	@Override
 	public Double analyze(CapturedFrame capturedFrame) {
 		Log.d(TAG, Thread.currentThread().getName() + "analyzing!");
 
 		return (double) 0;
+	}
+
+	@Override
+	public Mat visualAnalyze(CapturedFrame capturedFrame) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

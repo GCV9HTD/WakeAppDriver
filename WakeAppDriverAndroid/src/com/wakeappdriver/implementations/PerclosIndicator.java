@@ -11,33 +11,36 @@ import com.wakeappdriver.interfaces.Indicator;
 public class PerclosIndicator implements Indicator{
     private static final String TAG = "WAD";
 
-	private double value;	// avg eye-closure ratio
+	private Double value;
+	private int minSamples = 50;
 	
-	public PerclosIndicator (double value){
-		this.value = value;
+	public PerclosIndicator (){
 	}
+	
 	@Override
-	public double getValue() {
+	public Double getValue() {
 		return value;
 	}
 
 	@Override
 	public void calculate(Queue<FrameAnalyzerResult> results) {
-		double sum = 0;
-		int count = 0;
+		int countValidFrames = 0;
+		int countClosedFrames = 0;
 		for (FrameAnalyzerResult result : results) {
 			if (result.getValue() != null && !result.getValue().isInfinite() && !result.getValue().isNaN()) {
-				count++;
-				sum += result.getValue();
+				countValidFrames++;
+				if (result.getValue() <= 0.2) {
+					countClosedFrames++;
+				}
 			}
 		}
-		if (count == 0) {
-			value = 0;
+		if (countValidFrames < minSamples) {
+			value = null;
 		}
 		else {
-			value = sum / count;
+			value = (double)countClosedFrames / countValidFrames;
 		}
-		Log.d(TAG, Thread.currentThread().getName() + " :: calculated PERCLOS: " + value + ", sum = " + sum +", count = " + count);
+		Log.d(TAG, Thread.currentThread().getName() + " :: calculated PERCLOS: " + value + ", ValidFrames = " + countValidFrames +", ClosedFrames = " + countClosedFrames);
 	}
 
 	@Override

@@ -14,9 +14,9 @@ public class WakeAppPredictor implements Predictor {
     private static final String TAG = "WAD";
 
 	@Override
-	public double predictDrowsiness(HashMap<IndicatorType, Indicator> indicators) {
+	public Double predictDrowsiness(HashMap<IndicatorType, Indicator> indicators) {
 		logWindowResult(indicators);
-		return 1-indicators.get(IndicatorType.PERCLOS).getValue();
+		return indicators.get(IndicatorType.PERCLOS).getValue();
 	}
 	
 	private void logWindowResult(HashMap<IndicatorType, Indicator> indicators) {
