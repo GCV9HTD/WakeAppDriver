@@ -3,6 +3,7 @@ package com.wakeappdriver.configuration;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 
 import com.wakeappdriver.R;
@@ -10,91 +11,90 @@ import com.wakeappdriver.R;
 public class ConfigurationParameters {
 	
 	private SharedPreferences sharedPref;
-
-	private int windowSize;
-	private int maxFrameQueueSize;
-	private double alertThreshold;
-	private String alertType;
-	private int minSamples;
-	private int learningModeDuration;
-	private int durationBetweenAlerts;
-	private boolean cameraMode;
 	
 	public ConfigurationParameters(Context context) {
 		Resources res = context.getResources();
 		this.sharedPref = context.getSharedPreferences(res.getString(R.string.awd_config_fname), Activity.MODE_PRIVATE);
-		this.windowSize = sharedPref.getInt(res.getString(R.string.awd_config_window_sizw_key), 15000);
-		this.maxFrameQueueSize = sharedPref.getInt("maxFrameQueueSize", 20);
-		this.alertThreshold = sharedPref.getFloat(res.getString(R.string.awd_config_threshold_key), (float) 0.15);
-		this.alertType = sharedPref.getString("alertType", "SimpleAlerter");
-		this.minSamples = sharedPref.getInt("minSamples", 50);
-		this.learningModeDuration = sharedPref.getInt("learningModeDuration", 2);
-		this.durationBetweenAlerts = sharedPref.getInt("durationBetweenAlerts", 3);
-		this.cameraMode = sharedPref.getBoolean("cameraMode", false);	// true = native, false = java
 	}
 
 	public int getWindowSize() {
-		return windowSize;
+		return sharedPref.getInt("windowSize", 15000);
 	}
 
 	public void setWindowSize(int windowSize) {
-		this.windowSize = windowSize;
+		Editor editor = this.sharedPref.edit();
+		editor.putInt("windowSize", windowSize);
+		editor.apply();
 	}
 
 	public int getMaxFrameQueueSize() {
-		return maxFrameQueueSize;
+		return sharedPref.getInt("maxFrameQueueSize", 20);
 	}
 
 	public void setMaxFrameQueueSize(int maxFrameQueueSize) {
-		this.maxFrameQueueSize = maxFrameQueueSize;
+		Editor editor = this.sharedPref.edit();
+		editor.putInt("maxFrameQueueSize", maxFrameQueueSize);
+		editor.apply();	
 	}
 
 	public double getAlertThreshold() {
-		return alertThreshold;
+		return sharedPref.getFloat("alertThreshold", (float) 0.15);
 	}
 
 	public void setAlertThreshold(double alertThreshold) {
-		this.alertThreshold = alertThreshold;
+		Editor editor = this.sharedPref.edit();
+		editor.putFloat("alertThreshold", (float)alertThreshold);
+		editor.apply();	
 	}
 
 	public String getAlertType() {
-		return alertType;
+		return sharedPref.getString("alertType", "SimpleAlerter");
 	}
 
 	public void setAlertType(String alertType) {
-		this.alertType = alertType;
+		Editor editor = this.sharedPref.edit();
+		editor.putString("alertType", alertType);
+		editor.apply();
 	}
 
 	public int getMinSamples() {
-		return minSamples;
+		return sharedPref.getInt("minSamples", 50);
 	}
 
 	public void setMinSamples(int minSamples) {
-		this.minSamples = minSamples;
+		Editor editor = this.sharedPref.edit();
+		editor.putInt("minSamples", minSamples);
+		editor.apply();	
 	}
 
 	public int getLearningModeDuration() {
-		return learningModeDuration;
+		return sharedPref.getInt("learningModeDuration", 2);
 	}
 
 	public void setLearningModeDuration(int learningModeDuration) {
-		this.learningModeDuration = learningModeDuration;
+		Editor editor = this.sharedPref.edit();
+		editor.putInt("learningModeDuration", learningModeDuration);
+		editor.apply();	
 	}
 
 	public int getDurationBetweenAlerts() {
-		return durationBetweenAlerts;
+		return sharedPref.getInt("durationBetweenAlerts", 3);
 	}
 
 	public void setDurationBetweenAlerts(int durationBetweenAlerts) {
-		this.durationBetweenAlerts = durationBetweenAlerts;
+		Editor editor = this.sharedPref.edit();
+		editor.putInt("durationBetweenAlerts", durationBetweenAlerts);
+		editor.apply();	
 	}
 
 	public boolean getCameraMode() {
-		return cameraMode;
+		return sharedPref.getBoolean("cameraMode", false);	// true = native, false = java
 	}
 
 	public void setCameraMode(boolean cameraMode) {
-		this.cameraMode = cameraMode;
+		Editor editor = this.sharedPref.edit();
+		editor.putBoolean("cameraMode", cameraMode);
+		editor.apply();	
 	}
 	
 }
