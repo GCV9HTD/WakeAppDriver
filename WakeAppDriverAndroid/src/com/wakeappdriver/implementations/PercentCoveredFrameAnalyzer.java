@@ -207,6 +207,9 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 
 				//draw zoom areas
 				displayMat(toDisplayGray,toDisplayRBGA);
+				
+				toDisplayGray.release();
+				toDisplayRBGA.release();
 			}
 		}
 		faces.release();
@@ -242,7 +245,7 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 		if (height > maxHeight)
 			maxHeight = height;
 		
-		if (height < minHeight)
+		if (height < minHeight && height > 4)	// 4 is a temporary absolute min-limit
 			minHeight = height;
 
 		double ratio = (height-minHeight) / (maxHeight-minHeight);
@@ -269,7 +272,6 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 		//formula that fits all light situations
 		double mean = Core.mean(toDisplayGray).val[0];
 		double thresh    = mean*(0.75);
-
 		return thresh;
 	}
 

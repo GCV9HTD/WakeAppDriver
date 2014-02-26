@@ -12,9 +12,10 @@ public class PerclosIndicator implements Indicator{
     private static final String TAG = "WAD";
 
 	private Double value;
-	private int minSamples = 50;
+	private int minSamples;
 	
-	public PerclosIndicator (){
+	public PerclosIndicator (int minSamples){
+		this.minSamples = minSamples;
 	}
 	
 	@Override
@@ -45,7 +46,9 @@ public class PerclosIndicator implements Indicator{
 
 	@Override
 	public boolean interested(FrameAnalyzerType type) {
-		return true;
+		if (type.equals(FrameAnalyzerType.PERCENT_COVERED))
+			return true;
+		return false;
 	}
 
 }

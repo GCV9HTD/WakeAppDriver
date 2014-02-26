@@ -29,6 +29,7 @@ import com.wakeappdriver.configuration.ConfigurationParameters;
 import com.wakeappdriver.enums.FrameAnalyzerType;
 import com.wakeappdriver.enums.FrameQueueType;
 import com.wakeappdriver.enums.IndicatorType;
+import com.wakeappdriver.implementations.BlinkDurationIndicator;
 import com.wakeappdriver.implementations.PercentCoveredFrameAnalyzer;
 import com.wakeappdriver.implementations.PerclosIndicator;
 import com.wakeappdriver.implementations.SimpleAlerter;
@@ -245,7 +246,7 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 		
 		Mat gray = inputFrame.gray().clone();
 		Mat rgba = inputFrame.rgba().clone();
-		Long timestamp = System.nanoTime();
+		Long timestamp = System.currentTimeMillis();
 		queueManager.putFrame(new CapturedFrame(timestamp, rgba, gray));
 		return rgba;
 	}
@@ -280,13 +281,14 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 		this.frameAnalyzers = new ArrayList<FrameAnalyzer>();
 		this.frameAnalyzers.add(frameAnalyzer1);
 
-		Indicator indicator1 = new PerclosIndicator();
-//		Indicator indicator2 = new StubIndicator(5);
+		int minSamples = params.getMinSamples();
+		Indicator indicator1 = new PerclosIndicator(minSamples);
+		Indicator indicator2 = new BlinkDurationIndicator(5);
 //		Indicator indicator3 = new StubIndicator(7);
 
 		HashMap<IndicatorType,Indicator> indicatorList = new HashMap<IndicatorType,Indicator>();
 		indicatorList.put(IndicatorType.PERCLOS, indicator1);
-//		indicatorList.add(indicator2);
+		indicatorList.put(IndicatorType.BLINK_DURATION, indicator2);
 //		indicatorList.add(indicator3);
 
 		this.frameAnalyzerTasks = new ArrayList<Thread>();

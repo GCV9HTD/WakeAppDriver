@@ -4,9 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -19,21 +16,7 @@ import org.opencv.objdetect.CascadeClassifier;
 
 import com.wakeappdriver.classes.CapturedFrame;
 import com.wakeappdriver.classes.FrameAnalyzer;
-import com.wakeappdriver.classes.FrameQueue;
-import com.wakeappdriver.classes.FrameQueueManager;
-import com.wakeappdriver.classes.ResultQueue;
-import com.wakeappdriver.classes.WindowAnalyzer;
-import com.wakeappdriver.enums.FrameAnalyzerType;
-import com.wakeappdriver.enums.FrameQueueType;
-import com.wakeappdriver.enums.IndicatorType;
 import com.wakeappdriver.implementations.PercentCoveredFrameAnalyzer;
-import com.wakeappdriver.implementations.PerclosIndicator;
-import com.wakeappdriver.implementations.SimpleAlerter;
-import com.wakeappdriver.implementations.WakeAppPredictor;
-import com.wakeappdriver.interfaces.Alerter;
-import com.wakeappdriver.interfaces.Indicator;
-import com.wakeappdriver.interfaces.Predictor;
-import com.wakeappdriver.tasks.DetectorTask;
 import com.wakeappdriver.R;
 
 import android.os.Bundle;
@@ -221,7 +204,9 @@ public class DebugActivity extends Activity implements CvCameraViewListener2 {
 		if(this.frameAnalyzer == null) {
 			this.frameAnalyzer = new PercentCoveredFrameAnalyzer(mFaceDetector, mRightEyeDetector);
 		}
-		return this.frameAnalyzer.visualAnalyze(new CapturedFrame(timestamp, rgba, gray));
+		
+		rgba = this.frameAnalyzer.visualAnalyze(new CapturedFrame(timestamp, rgba, gray));
+		return rgba;
 	}
 
 
