@@ -41,6 +41,7 @@ import com.wakeappdriver.tasks.DetectorTask;
 import com.wakeappdriver.R;
 
 import android.os.Bundle;
+import android.provider.Settings.Secure;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -317,9 +318,13 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 		
 		int learningModeDuration = params.getLearningModeDuration();
 		int durationBetweenAlerts = params.getDurationBetweenAlerts();
+		boolean collectMode = params.getCollectMode();
+		int numOfWindowsBetweenTwoQueries = params.getNumOfWindowsBetweenTwoQueries();
+		String android_id = Secure.getString(getBaseContext().getContentResolver(),
+                Secure.ANDROID_ID);
 		
 		this.detector = new DetectorTask(alerter, windowAnalyzer, predictor, alertThreshold, windowSize, noIdenAlerter,
-				learningModeDuration, durationBetweenAlerts);
+				learningModeDuration, durationBetweenAlerts,collectMode,numOfWindowsBetweenTwoQueries, android_id);
 
 		this.detectionTask = new Thread(this.detector);
 		detectionTask.setName("DetectionTask");

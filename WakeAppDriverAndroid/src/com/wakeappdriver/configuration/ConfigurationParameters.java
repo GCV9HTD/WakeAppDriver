@@ -20,10 +20,31 @@ public class ConfigurationParameters {
 	public int getWindowSize() {
 		return sharedPref.getInt("windowSize", 15000);
 	}
+	
 
 	public void setWindowSize(int windowSize) {
 		Editor editor = this.sharedPref.edit();
 		editor.putInt("windowSize", windowSize);
+		editor.apply();
+	}
+	
+	public int getNumOfWindowsBetweenTwoQueries(){
+		return sharedPref.getInt("numOfWindowsBetweenTwoQueries", 10);
+	}
+	
+	public void setNumOfWindowsBetweenTwoQueries(int numOfWindowsBetweenTwoQueries){
+		Editor editor = this.sharedPref.edit();
+		editor.putInt("numOfWindowsBetweenTwoQueries", numOfWindowsBetweenTwoQueries);
+		editor.apply();
+	}
+	
+	public boolean getCollectMode(){
+		return sharedPref.getBoolean("collectMode", false);
+	}
+	
+	public void setCollectMode(boolean isInCollectingMode){
+		Editor editor = this.sharedPref.edit();
+		editor.putBoolean("collectMode", isInCollectingMode);
 		editor.apply();
 	}
 

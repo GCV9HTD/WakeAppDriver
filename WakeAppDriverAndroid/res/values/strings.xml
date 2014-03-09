@@ -14,4 +14,8 @@
     <string name="awd_config_window_sizw_key">WINDOW_SIZE</string>
     <string name="awd_config_native_cam_key">NATIVE_CAMERA</string>
     
+    <string name="ftp_host">wakeappdriver.bugs3.com</string>
+    <string name="ftp_username">u659681709</string>
+    <string name="ftp_password">ilwadfa14</string>
+    
 </resources>
