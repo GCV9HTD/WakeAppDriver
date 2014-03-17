@@ -1,20 +1,18 @@
 package com.wakeappdriver.tasks;
 
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 
-import android.content.res.Resources;
 import android.os.Environment;
+import android.os.Handler;
 import android.util.Log;
-import android.webkit.WebView.FindListener;
 
-import com.wakeappdriver.R;
-import com.wakeappdriver.classes.NoIdentificationAlerter;
 import com.wakeappdriver.classes.WadFTPClient;
 import com.wakeappdriver.classes.WindowAnalyzer;
+import com.wakeappdriver.configuration.ConfigurationParameters;
 import com.wakeappdriver.enums.IndicatorType;
+import com.wakeappdriver.gui.GoActivity;
 import com.wakeappdriver.interfaces.Alerter;
 import com.wakeappdriver.interfaces.Indicator;
 import com.wakeappdriver.interfaces.Predictor;
@@ -28,7 +26,8 @@ import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 
 
-public class DetectorTask implements Runnable{
+
+public class DetectorTask implements Runnable {
     private static final String TAG = "WAD";
 	
 	private WindowAnalyzer windowAnalyzer;
@@ -49,14 +48,15 @@ public class DetectorTask implements Runnable{
 	private OutputStreamWriter logFile;
 	private int numOfWindowsBetweenTwoQueries;
 	private int windowNumber;
-	private int drowsinessMeasure;
 	private String android_id;
-	
+	private ConfigurationParameters params;
+	private HashMap<IndicatorType,Indicator> indicators;
 	private volatile boolean isAlive;
+	private Handler uiHandler;
 	
 	public DetectorTask(Alerter alerter, WindowAnalyzer windowsAnalyzer, 
 			Predictor predictor, double alertThreshold, int windowSize, Alerter noIdenAlerter,
-			int learningModeDuration, int durationBetweenAlerts, boolean collectMode, int numOfWindowsBetweenTwoQueries, String android_id){
+			int learningModeDuration, int durationBetweenAlerts, boolean collectMode, int numOfWindowsBetweenTwoQueries, String android_id, ConfigurationParameters params, Handler uiHandler){
 		Log.d(TAG, Thread.currentThread().getName() + ":: starting Detector Task");
 		this.windowAnalyzer = windowsAnalyzer;
 		this.alerter = alerter;
@@ -70,23 +70,22 @@ public class DetectorTask implements Runnable{
 		this.collectMode = collectMode;
 		this.windowNumber = 0;
 		this.numOfWindowsBetweenTwoQueries = numOfWindowsBetweenTwoQueries;
-		this.drowsinessMeasure = 0;
 		this.android_id = android_id;
+		this.params = params;
+		this.indicators = null;
+		this.uiHandler = uiHandler;
 	}
 	@Override
 	public void run() {	
 		
-		//remove this - only for debugging
-		collectMode = true;
 		
 		Log.d(TAG, Thread.currentThread().getName() + ":: running Detector Task");
 
-		HashMap<IndicatorType,Indicator> indicators = null;
+		
 		int windowsSinceLastAlert = 0;
 		Double prediction = 0.0;
 		
 		if(collectMode){
-
 				File externalDirectoryStorage = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 				File outDir=new File(externalDirectoryStorage,collectFolder);
 				if (!outDir.exists()){
@@ -124,6 +123,7 @@ public class DetectorTask implements Runnable{
 					Log.d(TAG, "Error: could not open log file " + outFile.getName() );
 					collectMode = false;
 				}
+				
 
 		}
 		
@@ -184,7 +184,7 @@ public class DetectorTask implements Runnable{
 				}
 			}
 			if(collectMode){
-				writeToFile(indicators.values());
+				writeToFile();
 			}
 		}
 		try {
@@ -205,18 +205,23 @@ public class DetectorTask implements Runnable{
 		return windowSize;
 	}
 	
-	private void writeToFile(Collection<Indicator> indicators) {
+	private void writeToFile() {
 		String log = "";
 		String delimiter = ",";
         try {
-        	for(Indicator currIndicator : indicators){
+        	for(Indicator currIndicator : indicators.values()){
         		log += currIndicator.getValue() + delimiter;
         	}
         	log+= new SimpleDateFormat("HH:mm:ss.SSS").format(Calendar.getInstance().getTime());
         	if(windowNumber>=numOfWindowsBetweenTwoQueries){
         		windowNumber = 0;
+        		
+        		triggerVoiceRecognition();
         		//create new thread to update drowsiness measure
-        		log += delimiter + drowsinessMeasure;
+        		int drowsinessAssumption  = params.getDrowsinessAssumption();
+        		if(drowsinessAssumption != -1){
+        			log += delimiter + drowsinessAssumption;
+        		}
         	}
         	log+="\r\n";
         	logFile.write(log);
@@ -226,5 +231,10 @@ public class DetectorTask implements Runnable{
         } 
          
     }
+	
+	
+	private void triggerVoiceRecognition(){
+		uiHandler.sendEmptyMessage(GoActivity.VOICE_RECOGNITION_CODE);		
+	}
 
 }

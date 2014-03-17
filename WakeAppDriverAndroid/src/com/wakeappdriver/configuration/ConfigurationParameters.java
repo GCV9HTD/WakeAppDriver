@@ -28,6 +28,16 @@ public class ConfigurationParameters {
 		editor.apply();
 	}
 	
+	public int getDrowsinessAssumption(){
+		return sharedPref.getInt("drowsinessAssumption", -1);
+	}
+	
+	public void setDrosinessAssumption(int drowsinessAssumption){
+		Editor editor = this.sharedPref.edit();
+		editor.putInt("drowsinessAssumption", drowsinessAssumption);
+		editor.apply();
+	}
+	
 	public int getNumOfWindowsBetweenTwoQueries(){
 		return sharedPref.getInt("numOfWindowsBetweenTwoQueries", 10);
 	}

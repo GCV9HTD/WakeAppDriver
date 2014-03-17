@@ -40,16 +40,25 @@ import com.wakeappdriver.interfaces.Predictor;
 import com.wakeappdriver.tasks.DetectorTask;
 import com.wakeappdriver.R;
 
+import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.Settings.Secure;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
+import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 
 public class GoActivity extends Activity implements CvCameraViewListener2 {
@@ -66,6 +75,24 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 	
 	private Thread detectionTask;
 	private List<Thread> frameAnalyzerTasks;
+	private ConfigurationParameters params;
+	private static final int REQUEST_CODE = 1234;
+	public static final int VOICE_RECOGNITION_CODE = 5678;
+	
+	private final Handler voiceHandler = new Handler() {
+		 
+        // Create handleMessage function
+
+       public void handleMessage(Message msg) {
+                
+
+               if (msg!=null && msg.what == VOICE_RECOGNITION_CODE) {
+
+                   startVoiceRecognition();
+               } 
+
+           }
+       };
 
 	private BaseLoaderCallback  mLoaderCallback = new BaseLoaderCallback(this) {
 		@Override
@@ -142,7 +169,9 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 		}
 	};
 	
-	@Override
+
+
+	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_camera_view_listener_activty);
@@ -151,7 +180,7 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 		// Show the Up button in the action bar.
 
 		Resources res = getResources();
-		ConfigurationParameters params = new ConfigurationParameters(this);
+		this.params = new ConfigurationParameters(this);
 
 		this.init(params); //initialize WAD data structures
 		
@@ -323,12 +352,68 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 		String android_id = Secure.getString(getBaseContext().getContentResolver(),
                 Secure.ANDROID_ID);
 		
+		if(collectMode){
+			// Disable button if no recognition service is present
+			  PackageManager pm = getPackageManager();
+			  List<ResolveInfo> activities = pm.queryIntentActivities(new Intent(
+			    RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
+			  if (activities.size() == 0) {
+			   collectMode = false;
+			   Log.d(TAG, "google voice is not installed on this device");
+			  }
+		}
 		this.detector = new DetectorTask(alerter, windowAnalyzer, predictor, alertThreshold, windowSize, noIdenAlerter,
-				learningModeDuration, durationBetweenAlerts,collectMode,numOfWindowsBetweenTwoQueries, android_id);
+				learningModeDuration, durationBetweenAlerts,collectMode,numOfWindowsBetweenTwoQueries, android_id, params, voiceHandler);
 
 		this.detectionTask = new Thread(this.detector);
 		detectionTask.setName("DetectionTask");
 		detectionTask.start();
+		
 	}
+	
+	public void startVoiceRecognition(){
+		
+		  MediaPlayer mPlayer = MediaPlayer.create(this, R.raw.tiredness);
+		  mPlayer.start();
+		  mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+			
+			@Override
+			public void onCompletion(MediaPlayer mp) {
+				Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+				  intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+				    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+				  intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
+				    "WakeAppDriver Voice Recognition");
+				startActivityForResult(intent, REQUEST_CODE);
+			}
+		});
+		  
+	}
+
+	 @Override
+	 protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	  if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
+	   ArrayList<String> matches = data
+	     .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+	   boolean found = false;
+	   int drowsinessAssumption = -1;
+	   for(String curr : matches) {
+		   if(!found){
+			   try{
+				   int temp = Integer.parseInt(curr);
+				   if(temp>=1 && temp<=10){
+					   drowsinessAssumption = temp;
+				   }
+				   found = true;
+			   }
+			   catch(Exception e){
+			   }
+		   }
+	   }
+	   params.setDrosinessAssumption(drowsinessAssumption);
+	  }
+	  //super.onActivityResult(requestCode, resultCode, data);
+	 }
+	 
 
 }
