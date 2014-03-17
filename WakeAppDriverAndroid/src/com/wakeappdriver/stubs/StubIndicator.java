@@ -3,13 +3,11 @@ package com.wakeappdriver.stubs;
 import java.util.Queue;
 
 import com.wakeappdriver.classes.FrameAnalyzerResult;
-import com.wakeappdriver.enums.FrameAnalyzerType;
 import com.wakeappdriver.interfaces.Indicator;
+import com.wakeappdriver.enums.Enums.*;
 
 public class StubIndicator implements Indicator{
-    private static final String TAG = "WAD";
-
-	private Double value = 0.0;
+    private Double value = 0.0;
 	
 	public StubIndicator (double value){
 		this.value = value;

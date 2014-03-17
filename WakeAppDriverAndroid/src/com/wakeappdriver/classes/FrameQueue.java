@@ -1,9 +1,11 @@
 package com.wakeappdriver.classes;
 
+import com.wakeappdriver.enums.Enums.*;
+
 import java.util.ArrayDeque;
 import java.util.Queue;
 
-import com.wakeappdriver.enums.FrameQueueType;
+import com.wakeappdriver.configuration.ConfigurationParameters;
 
 import android.util.Log;
 
@@ -13,9 +15,9 @@ public class FrameQueue {
     private FrameQueueType type;
     private int maxCapacity;	
 	
-	public FrameQueue(int maxCapacity, FrameQueueType type){
+	public FrameQueue(FrameQueueType type){
 		Log.d(TAG, Thread.currentThread().getName() + " :: creating frame queue: capacity " + maxCapacity + ", type "+ type.name());
-		this.maxCapacity = maxCapacity;
+		this.maxCapacity = ConfigurationParameters.getMaxFrameQueueSize();
 		this.type = type;
 		this.frames = new ArrayDeque<CapturedFrame>();
 	}

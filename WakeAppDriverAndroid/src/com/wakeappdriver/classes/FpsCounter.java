@@ -4,10 +4,7 @@ import java.text.DecimalFormat;
 
 import org.opencv.core.Core;
 
-import android.util.Log;
-
 public class FpsCounter {
-    private static final String TAG               = "FpsCounter";
     private static final int    STEP              = 20;
     private static final DecimalFormat FPS_FORMAT = new DecimalFormat("0.00");
 

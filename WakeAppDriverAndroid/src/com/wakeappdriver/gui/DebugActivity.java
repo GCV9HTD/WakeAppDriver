@@ -119,7 +119,6 @@ public class DebugActivity extends Activity implements CvCameraViewListener2 {
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		// Show the Up button in the action bar.
-
 		Resources res = getResources();
 		SharedPreferences config = this.getSharedPreferences(res.getString(R.string.awd_config_fname), MODE_PRIVATE);
 		

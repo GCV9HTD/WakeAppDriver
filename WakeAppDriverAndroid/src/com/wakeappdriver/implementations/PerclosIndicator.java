@@ -5,8 +5,9 @@ import java.util.Queue;
 import android.util.Log;
 
 import com.wakeappdriver.classes.FrameAnalyzerResult;
-import com.wakeappdriver.enums.FrameAnalyzerType;
+import com.wakeappdriver.configuration.ConfigurationParameters;
 import com.wakeappdriver.interfaces.Indicator;
+import com.wakeappdriver.enums.Enums.*;
 
 public class PerclosIndicator implements Indicator{
     private static final String TAG = "WAD";
@@ -14,8 +15,8 @@ public class PerclosIndicator implements Indicator{
 	private Double value;
 	private int minSamples;
 	
-	public PerclosIndicator (int minSamples){
-		this.minSamples = minSamples;
+	public PerclosIndicator(){
+		this.minSamples = ConfigurationParameters.getMinSamples();
 	}
 	
 	@Override

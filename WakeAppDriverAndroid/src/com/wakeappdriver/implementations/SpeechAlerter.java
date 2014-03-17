@@ -2,34 +2,36 @@ package com.wakeappdriver.implementations;
 
 import java.util.Locale;
 
+import com.wakeappdriver.interfaces.Alerter;
+
 import android.content.Context;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnInitListener;
 import android.util.Log;
 
-import com.wakeappdriver.interfaces.Alerter;
 
-public class SimpleAlerter implements Alerter, OnInitListener{
+public class SpeechAlerter implements Alerter, OnInitListener{
 	
 	public static String TAG = "WAD";
 	
 	private TextToSpeech tts;
+	private String message;
 	
-	public SimpleAlerter(Context context) {
-		Log.d(TAG, Thread.currentThread().getName() + " :: SimpleAlerter has been created");
+	public SpeechAlerter(Context context, String message) {
+		Log.d(TAG, Thread.currentThread().getName() + " :: speech alerter has been created");
 		tts = new TextToSpeech(context, this);
 		tts.setLanguage(Locale.US);
+		this.message = message;
 	}
 	
 	@Override
 	public void alert() {
 		Log.i(TAG, Thread.currentThread().getName() + " :: ALERT");
-		tts.speak("Hey, Wake Up, Driver!", TextToSpeech.QUEUE_FLUSH, null);
+		tts.speak(message, TextToSpeech.QUEUE_FLUSH, null);
 	}
 
 	@Override
 	public void onInit(int arg0) {
-		tts.speak("The system is tracking you now.", TextToSpeech.QUEUE_FLUSH, null);
 	}
 	
 	@Override

@@ -8,10 +8,12 @@
     <string name="title_activity_settings">SettingsActivity</string>
     <string name="title_activity_start_screen_cv_listener">StartScreenCvListener</string>
     <string name="title_activity_camera_view_listener_activty">CameraViewListenerActivty</string>
-    
-	<string name="awd_config_fname">awd.config</string>
+    <string name="awd_config_fname">awd.config</string>
     <string name="awd_config_threshold_key">ALERT_THRESHOLD_KEY</string>
     <string name="awd_config_window_sizw_key">WINDOW_SIZE</string>
     <string name="awd_config_native_cam_key">NATIVE_CAMERA</string>
-    
+    <string name="no_iden_message">The system couldn\'t track you. Please set the smartphone again.</string>
+    <string name="emergency_message">niv!,Wake up now.</string>
+    <string name="title_activity_monitor">MonitorActivity</string>
+
 </resources>
