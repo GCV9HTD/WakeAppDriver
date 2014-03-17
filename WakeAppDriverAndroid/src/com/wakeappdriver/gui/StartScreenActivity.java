@@ -4,7 +4,7 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
-import services.GoService;
+import com.wakeappdriver.services.GoService;
 
 import com.wakeappdriver.configuration.ConfigurationParameters;
 import com.wakeappdriver.enums.Enums.StartMode;
