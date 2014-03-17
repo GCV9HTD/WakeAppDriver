@@ -27,6 +27,7 @@ import com.wakeappdriver.classes.FrameQueueManager;
 import com.wakeappdriver.classes.ResultQueue;
 import com.wakeappdriver.classes.WindowAnalyzer;
 import com.wakeappdriver.configuration.ConfigurationParameters;
+import com.wakeappdriver.enums.Enums.*;
 import com.wakeappdriver.implementations.BlinkDurationIndicator;
 import com.wakeappdriver.implementations.PercentCoveredFrameAnalyzer;
 import com.wakeappdriver.implementations.PerclosIndicator;
@@ -39,14 +40,21 @@ import com.wakeappdriver.interfaces.Predictor;
 import com.wakeappdriver.tasks.DetectorTask;
 import com.wakeappdriver.R;
 
+import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.provider.Settings.Secure;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.WindowManager;
-import com.wakeappdriver.enums.Enums.*;
 
 
 public class GoActivity extends Activity implements CvCameraViewListener2 {
@@ -63,6 +71,23 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 
 	private Thread detectionTask;
 	private List<Thread> frameAnalyzerTasks;
+	private static final int REQUEST_CODE = 1234;
+	public static final int VOICE_RECOGNITION_CODE = 5678;
+
+	private final Handler voiceHandler = new Handler() {
+
+		// Create handleMessage function
+
+		public void handleMessage(Message msg) {
+
+
+			if (msg!=null && msg.what == VOICE_RECOGNITION_CODE) {
+
+				startVoiceRecognition();
+			} 
+
+		}
+	};
 
 	private BaseLoaderCallback  mLoaderCallback = new BaseLoaderCallback(this) {
 		@Override
@@ -139,6 +164,7 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 		}
 	};
 
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -146,7 +172,7 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		// Show the Up button in the action bar.
-		
+
 		this.init(); //initialize WAD data structures
 
 		Thread.currentThread().setName("CameraThread");
@@ -305,20 +331,77 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 
 		Alerter noIdenAlerter = new SpeechAlerter(this,this.getString(R.string.no_iden_message));
 		Alerter EmeregencyAlerter = new SpeechAlerter(this,this.getString(R.string.emergency_message));
-		
+
 		WindowAnalyzer windowAnalyzer = new WindowAnalyzer(resultQueueList, indicatorList);
 		Predictor predictor = new WakeAppPredictor();
-		
+
 		AlerterContainer alerterContainer = new AlerterContainer(alerter, noIdenAlerter, EmeregencyAlerter);
-		
-		this.detector = new DetectorTask(alerterContainer, windowAnalyzer, predictor);
+		boolean collectMode = ConfigurationParameters.getCollectMode();
+
+		if(collectMode){
+			// Disable button if no recognition service is present
+			PackageManager pm = getPackageManager();
+			List<ResolveInfo> activities = pm.queryIntentActivities(new Intent(
+					RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
+			if (activities.size() == 0) {
+				collectMode = false;
+				Log.d(TAG, "google voice is not installed on this device");
+			}
+		}
+		String android_id = Secure.getString(getBaseContext().getContentResolver(),
+				Secure.ANDROID_ID);
+		this.detector = new DetectorTask(alerterContainer, windowAnalyzer, predictor, collectMode, voiceHandler, android_id);
 
 		this.detectionTask = new Thread(this.detector);
 		detectionTask.setName("DetectionTask");
 		detectionTask.start();
-		
+
 		EmergencyHandler emergencyHandler = new EmergencyHandler(detector);
 		frameAnalyzer1.setEmergencyHandler(emergencyHandler);
+	}
+
+	public void startVoiceRecognition(){
+
+		MediaPlayer mPlayer = MediaPlayer.create(this, R.raw.tiredness);
+		mPlayer.start();
+		mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+
+			@Override
+			public void onCompletion(MediaPlayer mp) {
+				Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+				intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+						RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+				intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
+						"WakeAppDriver Voice Recognition");
+				startActivityForResult(intent, REQUEST_CODE);
+			}
+		});
+
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
+			ArrayList<String> matches = data
+					.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+			boolean found = false;
+			int drowsinessAssumption = -1;
+			for(String curr : matches) {
+				if(!found){
+					try{
+						int temp = Integer.parseInt(curr);
+						if(temp>=1 && temp<=10){
+							drowsinessAssumption = temp;
+						}
+						found = true;
+					}
+					catch(Exception e){
+					}
+				}
+			}
+			ConfigurationParameters.setDrosinessAssumption(drowsinessAssumption);
+		}
+		//super.onActivityResult(requestCode, resultCode, data);
 	}
 
 }

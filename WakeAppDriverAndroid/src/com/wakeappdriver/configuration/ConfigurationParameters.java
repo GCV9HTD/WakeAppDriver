@@ -139,4 +139,34 @@ public class ConfigurationParameters {
 		editor.putString("StartMode", startMode.name());
 		editor.apply();		
 	}
+
+	public static boolean getCollectMode(){
+		return sharedPref.getBoolean("collectMode", false);
+	}
+	
+	public static void setCollectMode(boolean isInCollectingMode){
+		Editor editor = sharedPref.edit();
+		editor.putBoolean("collectMode", isInCollectingMode);
+		editor.apply();
+	}
+
+	public static int getDrowsinessAssumption(){
+		return sharedPref.getInt("drowsinessAssumption", -1);
+	}
+	
+	public static void setDrosinessAssumption(int drowsinessAssumption){
+		Editor editor = sharedPref.edit();
+		editor.putInt("drowsinessAssumption", drowsinessAssumption);
+		editor.apply();
+	}
+	
+	public static int getNumOfWindowsBetweenTwoQueries(){
+		return sharedPref.getInt("numOfWindowsBetweenTwoQueries", 10);
+	}
+	
+	public static void setNumOfWindowsBetweenTwoQueries(int numOfWindowsBetweenTwoQueries){
+		Editor editor = sharedPref.edit();
+		editor.putInt("numOfWindowsBetweenTwoQueries", numOfWindowsBetweenTwoQueries);
+		editor.apply();
+	}
 }

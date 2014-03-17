@@ -255,7 +255,7 @@ public class GoService  extends Service{
 
 		AlerterContainer alerterContainer = new AlerterContainer(guiAlerter, guiNoIdenAlerter, guiEmeAlerterAlerter);
 
-		this.detector = new DetectorTask(alerterContainer, windowAnalyzer, predictor);
+		this.detector = new DetectorTask(alerterContainer, windowAnalyzer, predictor, false, null, null);
 
 		this.detectionTask = new Thread(this.detector);
 		detectionTask.setName("DetectionTask");
