@@ -47,7 +47,8 @@ public class StartScreenActivity extends Activity {
 		getMenuInflater().inflate(R.menu.start_screen, menu);
 		return true;
 	}
-	public void toSettings(View view){
+	
+	public void toTrackScreen(View view){
 		Log.d(TAG, "entering");
 
 		if(DrawImage){	
@@ -64,12 +65,19 @@ public class StartScreenActivity extends Activity {
 				int frameHeight = v.getHeight();
 				//int frameWidth = 320;
 				//int frameHeight = 240;
-				
 				CameraTask camera = new CameraTask(0, 1, null, frameWidth, frameHeight);
 				t = new Thread(camera);
 				t.run();
 				Log.d(TAG, "height = " + frameHeight + " width = " + frameWidth);
 			}
 		}
+	}
+	
+	public void toSettingsScreen(View view){
+		Log.d(TAG, "entering");
+		
+		Intent intent = new Intent(this, SettingsActivity.class);
+		startActivity(intent);
+
 	}
 }
