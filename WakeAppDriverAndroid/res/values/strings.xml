@@ -18,5 +18,8 @@
     <string name="Button_Settings">Settings</string>
     <string name="title_activity_help">HelpActivity</string>
     <string name="BaseBackground">#0099cc</string>
+    <string name="no_iden_message">The system couldn\'t track you. Please set the smartphone again.</string>
+    <string name="emergency_message">niv!,Wake up now.</string>
+    <string name="title_activity_monitor">MonitorActivity</string>
 
 </resources>

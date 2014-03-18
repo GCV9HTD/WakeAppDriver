@@ -1,14 +1,12 @@
 package com.wakeappdriver.implementations;
-
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
 import android.util.Log;
 
-import com.wakeappdriver.enums.IndicatorType;
 import com.wakeappdriver.interfaces.Indicator;
 import com.wakeappdriver.interfaces.Predictor;
+import com.wakeappdriver.enums.Enums.*;
 
 public class WakeAppPredictor implements Predictor {
     private static final String TAG = "WAD";

@@ -33,7 +33,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="36dp"
-            android:onClick="toTrackScreen"
+            android:onClick="toMonitoring"
             android:text="@string/Button_Go"
             android:textColor="#FFFFFFFF"
             android:textSize="30sp"

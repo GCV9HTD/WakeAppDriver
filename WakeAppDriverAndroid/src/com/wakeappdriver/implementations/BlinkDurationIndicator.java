@@ -5,18 +5,20 @@ import java.util.Queue;
 import android.util.Log;
 
 import com.wakeappdriver.classes.FrameAnalyzerResult;
-import com.wakeappdriver.enums.FrameAnalyzerType;
+import com.wakeappdriver.configuration.ConfigurationParameters;
 import com.wakeappdriver.interfaces.Indicator;
+import com.wakeappdriver.enums.Enums.*;
 
 public class BlinkDurationIndicator implements Indicator{
     private static final String TAG = "WAD";
 
 	private Double value;
 	private int minSamples;
-	private double blinkLimit = 0.4;
+	private double blinkLimit;
 	
 	public BlinkDurationIndicator (int minSamples){
 		this.minSamples = minSamples;
+		this.blinkLimit = ConfigurationParameters.getBlinkLimit();
 	}
 	
 	@Override

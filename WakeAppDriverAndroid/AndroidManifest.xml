@@ -44,19 +44,19 @@
         </activity>
         <activity
             android:name="com.wakeappdriver.gui.GoActivity"
-            android:configChanges="keyboardHidden|orientation"
             android:label="@string/title_activity_camera_view_listener_activty"
-            android:parentActivityName="com.wakeappdriver.gui.StartScreenActivity"
-            android:screenOrientation="landscape" >
+            android:parentActivityName="com.wakeappdriver.gui.StartScreenActivity" 
+            android:screenOrientation="landscape"
+			android:configChanges="keyboardHidden|orientation">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.wakeappdriver.gui.StartScreenActivity" />
         </activity>
         <activity
             android:name="com.wakeappdriver.gui.DebugActivity"
-            android:configChanges="keyboardHidden|orientation"
-            android:parentActivityName="com.wakeappdriver.gui.StartScreenActivity"
-            android:screenOrientation="landscape" >
+            android:parentActivityName="com.wakeappdriver.gui.StartScreenActivity" 
+            android:screenOrientation="landscape"
+			android:configChanges="keyboardHidden|orientation">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.wakeappdriver.gui.StartScreenActivity" />

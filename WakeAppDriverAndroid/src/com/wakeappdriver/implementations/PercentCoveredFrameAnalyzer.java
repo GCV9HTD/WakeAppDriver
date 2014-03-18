@@ -14,11 +14,12 @@ import org.opencv.objdetect.Objdetect;
 import android.util.Log;
 
 import com.wakeappdriver.classes.CapturedFrame;
+import com.wakeappdriver.classes.EmergencyHandler;
 import com.wakeappdriver.classes.FrameAnalyzer;
 import com.wakeappdriver.classes.FrameQueue;
 import com.wakeappdriver.classes.FrameQueueManager;
 import com.wakeappdriver.classes.ResultQueue;
-import com.wakeappdriver.enums.OperationMode;
+import com.wakeappdriver.enums.Enums.*;
 
 public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
     
@@ -40,6 +41,7 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 	
 	private double maxHeight = 0;
 	private double minHeight = 100;
+	private EmergencyHandler emergencyHandler = null;
 	
 	public PercentCoveredFrameAnalyzer(FrameQueueManager queueManager,
 			FrameQueue frameQueue, ResultQueue resultQueue) {
@@ -58,6 +60,9 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 		this.mRightEyeDetector = mRightEyeDetector;
 	}
 
+	public void setEmergencyHandler(EmergencyHandler emergencyHandler){
+		this.emergencyHandler = emergencyHandler;
+	}
 	public void setmFaceDetector(CascadeClassifier mFaceDetector) {
 		this.mFaceDetector = mFaceDetector;
 	}
@@ -130,7 +135,11 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 			}
 		}
 		faces.release();
-
+		
+		if(emergencyHandler != null){
+			emergencyHandler.check(result, capturedFrame.getTimestamp());
+		}
+		
 		return result;
 	}
 	
@@ -249,10 +258,10 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 			minHeight = height;
 
 		double ratio = (height-minHeight) / (maxHeight-minHeight);
-		Log.d(TAG, Thread.currentThread().getName() + " :: Height = " + height);
-		Log.d(TAG, Thread.currentThread().getName() + " :: maxHeight = " + maxHeight);
-		Log.d(TAG, Thread.currentThread().getName() + " :: minHeight = " + minHeight);
-		Log.d(TAG, Thread.currentThread().getName() + " :: Ratio = " + ratio);
+		Log.i(TAG, Thread.currentThread().getName() + " :: Height = " + height);
+		Log.i(TAG, Thread.currentThread().getName() + " :: maxHeight = " + maxHeight);
+		Log.i(TAG, Thread.currentThread().getName() + " :: minHeight = " + minHeight);
+		Log.i(TAG, Thread.currentThread().getName() + " :: Ratio = " + ratio);
 
 		if(mode.equals(OperationMode.VISUAL_MODE)){ // no blink, draw red line
 			Core.line(toDisplayRgba, new Point(midCol,down), new Point(midCol,top), new Scalar(255,0,0));
@@ -271,7 +280,7 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 		//attempt to make a robust threshold, we should find a better
 		//formula that fits all light situations
 		double mean = Core.mean(toDisplayGray).val[0];
-		double thresh    = mean*(0.75);
+		double thresh    = mean*(0.75) - 5;
 		return thresh;
 	}
 
