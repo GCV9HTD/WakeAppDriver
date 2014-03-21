@@ -20,10 +20,13 @@ import org.opencv.objdetect.CascadeClassifier;
 
 import com.wakeappdriver.classes.AlerterContainer;
 import com.wakeappdriver.classes.CapturedFrame;
+import com.wakeappdriver.classes.CsvFileWriter;
+import com.wakeappdriver.classes.DataCollector;
 import com.wakeappdriver.classes.EmergencyHandler;
 import com.wakeappdriver.classes.FrameAnalyzer;
 import com.wakeappdriver.classes.FrameQueue;
 import com.wakeappdriver.classes.FrameQueueManager;
+import com.wakeappdriver.classes.FtpSender;
 import com.wakeappdriver.classes.ResultQueue;
 import com.wakeappdriver.classes.WindowAnalyzer;
 import com.wakeappdriver.configuration.ConfigurationParameters;
@@ -339,7 +342,7 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 		boolean collectMode = ConfigurationParameters.getCollectMode();
 
 		if(collectMode){
-			// Disable button if no recognition service is present
+			// Disable collection mode if google voice is not installed
 			PackageManager pm = getPackageManager();
 			List<ResolveInfo> activities = pm.queryIntentActivities(new Intent(
 					RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
@@ -350,7 +353,12 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 		}
 		String android_id = Secure.getString(getBaseContext().getContentResolver(),
 				Secure.ANDROID_ID);
-		this.detector = new DetectorTask(alerterContainer, windowAnalyzer, predictor, collectMode, voiceHandler, android_id);
+		
+		DataCollector dataCollector = null;
+		if(collectMode){
+			dataCollector = new DataCollector(voiceHandler, new FtpSender(), new CsvFileWriter(android_id)); 
+		}
+		this.detector = new DetectorTask(alerterContainer, windowAnalyzer, predictor, dataCollector);
 
 		this.detectionTask = new Thread(this.detector);
 		detectionTask.setName("DetectionTask");
