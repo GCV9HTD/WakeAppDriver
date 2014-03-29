@@ -4,6 +4,7 @@
     <string name="app_name">WakeAppDriver</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="goButton">Go!</string>
     <string name="goDebugButton">GoDebug!</string>
     <string name="title_activity_settings">SettingsActivity</string>
     <string name="title_activity_start_screen_cv_listener">StartScreenCvListener</string>
