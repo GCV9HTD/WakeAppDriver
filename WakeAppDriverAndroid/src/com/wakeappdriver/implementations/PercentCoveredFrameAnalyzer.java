@@ -18,11 +18,12 @@ import android.os.Environment;
 import android.util.Log;
 
 import com.wakeappdriver.classes.CapturedFrame;
+import com.wakeappdriver.classes.EmergencyHandler;
 import com.wakeappdriver.classes.FrameAnalyzer;
 import com.wakeappdriver.classes.FrameQueue;
 import com.wakeappdriver.classes.FrameQueueManager;
 import com.wakeappdriver.classes.ResultQueue;
-import com.wakeappdriver.enums.OperationMode;
+import com.wakeappdriver.enums.Enums.OperationMode;
 
 public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
     
@@ -44,6 +45,8 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 	
 	private double maxHeight = 0;
 	private double minHeight = 100;
+	
+	private EmergencyHandler emergencyHandler = null;
 	
 	private String pathToWrite = Environment.getExternalStorageDirectory() + "/WakeAppDriver/";
 	
@@ -75,6 +78,10 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 
 	public void setmRightEyeDetector(CascadeClassifier mRightEyeDetector) {
 		this.mRightEyeDetector = mRightEyeDetector;
+	}
+	
+	public void setEmergencyHandler(EmergencyHandler emergencyHandler){
+		this.emergencyHandler = emergencyHandler;
 	}
 
 	public Double analyze(CapturedFrame capturedFrame) {
@@ -124,6 +131,11 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 		toDisplayRBGA.release();
 
 //		Highgui.imwrite(pathToWrite + "detected_frame_" + capturedFrame.getTimestamp() + ".jpg", capturedFrame.rgba());
+		
+		if(emergencyHandler != null){
+			emergencyHandler.check(result, capturedFrame.getTimestamp());
+		}
+		
 		return result;
 	}
 

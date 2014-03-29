@@ -1,8 +1,7 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="center"
     android:background="#0099cc"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
@@ -10,50 +9,35 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".StartScreenActivity" >
 
-    <TextView
-        android:id="@+id/textView1"
-        android:layout_width="fill_parent"
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:drawableTop="@drawable/logo_small_blue"
-        android:gravity="center"
-        android:text="@string/app_name"
-        android:textAppearance="?android:attr/textAppearanceSmallInverse"
-        android:textColor="#33b5e5"
-        android:textSize="40sp" />
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="50dp" >
 
         <Button
-            android:id="@+id/button1"
-            android:layout_width="match_parent"
+            android:id="@+id/button_Settings"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center"
-            android:layout_marginBottom="30dp"
-            android:layout_marginLeft="50dp"
-            android:layout_marginRight="50dp"
-            android:onClick="toSettings"
-            android:text="@string/goButton"
+            android:layout_marginBottom="36dp"
+            android:onClick="toSettingsScreen"
+            android:text="@string/Button_Settings"
             android:textColor="#FFFFFFFF"
             android:textSize="30sp"
             android:textStyle="bold|italic" />
 
         <Button
-            android:id="@+id/Button01"
-            android:layout_width="match_parent"
+            android:id="@+id/button_Go"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:layout_marginBottom="90dp"
-            android:layout_marginLeft="50dp"
-            android:layout_marginRight="50dp"
-            android:onClick="goDebug"
-            android:text="@string/goDebugButton"
+            android:layout_marginBottom="36dp"
+            android:onClick="toMonitoring"
+            android:text="@string/Button_Go"
             android:textColor="#FFFFFFFF"
             android:textSize="30sp"
             android:textStyle="bold|italic" />
+    </LinearLayout>
 
-    </FrameLayout>
-
-</FrameLayout>
+</RelativeLayout>

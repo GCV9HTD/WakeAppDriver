@@ -3,7 +3,7 @@ package com.wakeappdriver.interfaces;
 import java.util.Queue;
 
 import com.wakeappdriver.classes.FrameAnalyzerResult;
-import com.wakeappdriver.enums.FrameAnalyzerType;
+import com.wakeappdriver.enums.Enums.*;
 
 public interface Indicator {
 	public Double getValue();

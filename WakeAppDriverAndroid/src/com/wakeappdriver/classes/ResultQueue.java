@@ -4,8 +4,7 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 
 import android.util.Log;
-
-import com.wakeappdriver.enums.FrameAnalyzerType;
+import com.wakeappdriver.enums.Enums.*;
 
 public class ResultQueue {
     private static final String TAG = "WAD";

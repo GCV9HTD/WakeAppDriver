@@ -1,6 +1,8 @@
 package com.wakeappdriver.interfaces;
 
 public interface Alerter {
-	public void alert();
-	public void destroy();
+	
+	public abstract void alert();
+	public abstract void destroy();
+	
 }

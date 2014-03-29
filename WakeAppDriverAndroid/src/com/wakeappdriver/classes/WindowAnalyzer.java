@@ -3,9 +3,8 @@ package com.wakeappdriver.classes;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Queue;
-
-import com.wakeappdriver.enums.IndicatorType;
 import com.wakeappdriver.interfaces.*;
+import com.wakeappdriver.enums.Enums.*;
 
 public class WindowAnalyzer {
 	private List<ResultQueue> resultQueues;
