@@ -13,5 +13,6 @@
     <string name="awd_config_threshold_key">ALERT_THRESHOLD_KEY</string>
     <string name="awd_config_window_sizw_key">WINDOW_SIZE</string>
     <string name="awd_config_native_cam_key">NATIVE_CAMERA</string>
+    <string name="goDebugButton">GoDebug!</string>
     
 </resources>

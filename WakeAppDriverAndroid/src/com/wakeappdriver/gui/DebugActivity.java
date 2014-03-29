@@ -95,6 +95,8 @@ public class DebugActivity extends Activity implements CvCameraViewListener2 {
 					
 					cascadeDir.delete();
 					cascadeDirER.delete();
+					
+					frameAnalyzer = new PercentCoveredFrameAnalyzer(mFaceDetector, mRightEyeDetector);
 										
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -201,10 +203,6 @@ public class DebugActivity extends Activity implements CvCameraViewListener2 {
 		Mat rgba = inputFrame.rgba().clone();
 		Long timestamp = System.nanoTime();
 
-		if(this.frameAnalyzer == null) {
-			this.frameAnalyzer = new PercentCoveredFrameAnalyzer(mFaceDetector, mRightEyeDetector);
-		}
-		
 		rgba = this.frameAnalyzer.visualAnalyze(new CapturedFrame(timestamp, rgba, gray));
 		return rgba;
 	}

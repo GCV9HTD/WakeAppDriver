@@ -72,4 +72,9 @@ public class StartScreenActivity extends Activity {
 			}
 		}
 	}
+
+	public void goDebug(View view) {
+		Intent intent = new Intent(this, DebugActivity.class);
+		startActivity(intent);
+	}
 }
