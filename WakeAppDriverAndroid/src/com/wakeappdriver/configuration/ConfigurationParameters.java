@@ -7,7 +7,7 @@ import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 
 import com.wakeappdriver.R;
-import com.wakeappdriver.enums.Enums.StartMode;
+import com.wakeappdriver.configuration.Enums.StartMode;
 
 public class ConfigurationParameters {
 	

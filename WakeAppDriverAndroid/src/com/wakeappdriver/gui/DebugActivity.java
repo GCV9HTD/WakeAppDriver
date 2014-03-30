@@ -14,9 +14,9 @@ import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.core.Mat;
 import org.opencv.objdetect.CascadeClassifier;
 
-import com.wakeappdriver.classes.CapturedFrame;
-import com.wakeappdriver.classes.FrameAnalyzer;
-import com.wakeappdriver.implementations.PercentCoveredFrameAnalyzer;
+import com.wakeappdriver.framework.dto.CapturedFrame;
+import com.wakeappdriver.framework.implementations.analyzers.PercentCoveredFrameAnalyzer;
+import com.wakeappdriver.framework.interfaces.FrameAnalyzer;
 import com.wakeappdriver.R;
 
 import android.os.Bundle;
