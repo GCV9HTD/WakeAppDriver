@@ -1,21 +1,41 @@
 package com.wakeappdriver.gui;
 
+import com.wakeappdriver.configuration.ConfigurationParameters;
+
 import android.app.Activity;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.util.Log;
 
 
 public class SettingsActivity extends Activity{
 	
-
+	public static String TAG = "WAD";
+	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, Thread.currentThread().getName() + " :: Display settings");
 
         // Display the fragment as the main content.
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new SettingsFragment())
                 .commit();
+        
+        Log.d(TAG, Thread.currentThread().getName() + " :: After display");
+      //  PreferenceManager.setDefaultValues(this, R.xml.advanced_preferences, false);
+       
     }
+	
+//	@Override
+//	public void onConfigurationChanged (Configuration newConfig){
+//	    super.onConfigurationChanged(newConfig);
+//	    
+//	    ConfigurationParameters.setAlertType("asa");
+//	}
+	
 }
 	
 	
