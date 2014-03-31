@@ -4,10 +4,10 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
-import com.wakeappdriver.services.GoService;
 
 import com.wakeappdriver.configuration.ConfigurationParameters;
-import com.wakeappdriver.enums.Enums.StartMode;
+import com.wakeappdriver.configuration.Enums.StartMode;
+import com.wakeappdriver.framework.services.GoService;
 import com.wakeappdriver.R;
 
 import android.os.Bundle;
@@ -86,11 +86,15 @@ public class StartScreenActivity extends Activity {
 		}
 	}
 	
+	public void goDebug(View view) {
+		Intent intent = new Intent(this, DebugActivity.class);
+		startActivity(intent);
+	}
+	
 	public void toSettingsScreen(View view){
 		Log.d(TAG, "entering");
 		
 		Intent intent = new Intent(this, SettingsActivity.class);
 		startActivity(intent);
-
 	}
 }

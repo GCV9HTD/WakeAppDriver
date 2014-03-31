@@ -7,7 +7,7 @@ import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 
 import com.wakeappdriver.R;
-import com.wakeappdriver.enums.Enums.StartMode;
+import com.wakeappdriver.configuration.Enums.StartMode;
 
 public class ConfigurationParameters {
 	
@@ -141,7 +141,7 @@ public class ConfigurationParameters {
 	}
 
 	public static boolean getCollectMode(){
-		return sharedPref.getBoolean("collectMode", false);
+		return sharedPref.getBoolean("collectMode", true);
 	}
 	
 	public static void setCollectMode(boolean isInCollectingMode){
@@ -161,7 +161,8 @@ public class ConfigurationParameters {
 	}
 	
 	public static int getNumOfWindowsBetweenTwoQueries(){
-		return sharedPref.getInt("numOfWindowsBetweenTwoQueries", 10);
+		//must be at least 2 to work properly
+		return sharedPref.getInt("numOfWindowsBetweenTwoQueries", 2);
 	}
 	
 	public static void setNumOfWindowsBetweenTwoQueries(int numOfWindowsBetweenTwoQueries){

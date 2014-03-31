@@ -14,9 +14,9 @@ import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.core.Mat;
 import org.opencv.objdetect.CascadeClassifier;
 
-import com.wakeappdriver.classes.CapturedFrame;
-import com.wakeappdriver.classes.FrameAnalyzer;
-import com.wakeappdriver.implementations.PercentCoveredFrameAnalyzer;
+import com.wakeappdriver.framework.dto.CapturedFrame;
+import com.wakeappdriver.framework.implementations.analyzers.PercentCoveredFrameAnalyzer;
+import com.wakeappdriver.framework.interfaces.FrameAnalyzer;
 import com.wakeappdriver.R;
 
 import android.os.Bundle;
@@ -95,6 +95,8 @@ public class DebugActivity extends Activity implements CvCameraViewListener2 {
 					
 					cascadeDir.delete();
 					cascadeDirER.delete();
+					
+					frameAnalyzer = new PercentCoveredFrameAnalyzer(mFaceDetector, mRightEyeDetector);
 										
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -119,6 +121,7 @@ public class DebugActivity extends Activity implements CvCameraViewListener2 {
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		// Show the Up button in the action bar.
+
 		Resources res = getResources();
 		SharedPreferences config = this.getSharedPreferences(res.getString(R.string.awd_config_fname), MODE_PRIVATE);
 		
@@ -200,10 +203,6 @@ public class DebugActivity extends Activity implements CvCameraViewListener2 {
 		Mat rgba = inputFrame.rgba().clone();
 		Long timestamp = System.nanoTime();
 
-		if(this.frameAnalyzer == null) {
-			this.frameAnalyzer = new PercentCoveredFrameAnalyzer(mFaceDetector, mRightEyeDetector);
-		}
-		
 		rgba = this.frameAnalyzer.visualAnalyze(new CapturedFrame(timestamp, rgba, gray));
 		return rgba;
 	}

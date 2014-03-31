@@ -1,4 +1,4 @@
-package com.wakeappdriver.gui;
+package com.wakeappdriver.framework.services;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -8,62 +8,48 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
-import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
-import org.opencv.core.Mat;
 import org.opencv.objdetect.CascadeClassifier;
 
+import com.wakeappdriver.R;
 import com.wakeappdriver.configuration.ConfigurationParameters;
 import com.wakeappdriver.configuration.Enums.*;
 import com.wakeappdriver.framework.AlerterContainer;
 import com.wakeappdriver.framework.EmergencyHandler;
 import com.wakeappdriver.framework.FrameQueue;
 import com.wakeappdriver.framework.FrameQueueManager;
+import com.wakeappdriver.framework.IntentMessenger;
 import com.wakeappdriver.framework.ResultQueue;
 import com.wakeappdriver.framework.WindowAnalyzer;
-import com.wakeappdriver.framework.datacollection.CsvFileWriter;
-import com.wakeappdriver.framework.datacollection.DataCollector;
-import com.wakeappdriver.framework.datacollection.FtpSender;
-import com.wakeappdriver.framework.dto.CapturedFrame;
+import com.wakeappdriver.framework.implementations.alerters.GuiAlerter;
 import com.wakeappdriver.framework.implementations.alerters.SimpleAlerter;
 import com.wakeappdriver.framework.implementations.alerters.SpeechAlerter;
 import com.wakeappdriver.framework.implementations.analyzers.PercentCoveredFrameAnalyzer;
 import com.wakeappdriver.framework.implementations.indicators.BlinkDurationIndicator;
 import com.wakeappdriver.framework.implementations.indicators.PerclosIndicator;
+import com.wakeappdriver.framework.implementations.intenthandlers.ServiceIntentHandler;
 import com.wakeappdriver.framework.implementations.predictors.WakeAppPredictor;
 import com.wakeappdriver.framework.interfaces.Alerter;
 import com.wakeappdriver.framework.interfaces.FrameAnalyzer;
 import com.wakeappdriver.framework.interfaces.Indicator;
+import com.wakeappdriver.framework.interfaces.IntentHandler;
 import com.wakeappdriver.framework.interfaces.Predictor;
 import com.wakeappdriver.framework.tasks.DetectorTask;
-import com.wakeappdriver.R;
+import com.wakeappdriver.framework.tasks.JavaCameraTask;
 
-import android.media.MediaPlayer;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.provider.Settings.Secure;
-import android.app.Activity;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.speech.RecognizerIntent;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.IBinder;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.WindowManager;
 
-
-public class GoActivity extends Activity implements CvCameraViewListener2 {
+public class GoService  extends Service{
 	private static final String TAG = "WAD";
 
-	private CameraBridgeViewBase   mOpenCvCameraView;
 
 	private CascadeClassifier mFaceDetector;
 	private CascadeClassifier mRightEyeDetector;
@@ -74,23 +60,13 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 
 	private Thread detectionTask;
 	private List<Thread> frameAnalyzerTasks;
-	private static final int REQUEST_CODE = 1234;
-	public static final int VOICE_RECOGNITION_CODE = 5678;
 
-	private final Handler voiceHandler = new Handler() {
+	private int frameWidth;
+	private int frameHeight;
 
-		// Create handleMessage function
-
-		public void handleMessage(Message msg) {
-
-
-			if (msg!=null && msg.what == VOICE_RECOGNITION_CODE) {
-
-				startVoiceRecognition();
-			} 
-
-		}
-	};
+	private IntentMessenger intentMessenger;
+	private Action[] actions = {Action.WAD_ACTION_GET_PREDICITON};
+	private IntentHandler intentHandler;
 
 	private BaseLoaderCallback  mLoaderCallback = new BaseLoaderCallback(this) {
 		@Override
@@ -156,7 +132,6 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 					Log.e(TAG, Thread.currentThread().getName() + " :: Failed to load cascade. Exception thrown: " + e);
 				}
 
-				mOpenCvCameraView.enableView();
 			}
 			break;
 			default:
@@ -167,79 +142,33 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 		}
 	};
 
+	@Override
+	public void onCreate() {
+		super.onCreate();
+		Log.d(TAG, "staring service");
+
+		this.intentHandler = new ServiceIntentHandler();
+		this.intentMessenger = new IntentMessenger(this, actions, intentHandler);	
+		this.intentMessenger.register();
+
+	}
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_camera_view_listener_activty);
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-		// Show the Up button in the action bar.
-
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		frameWidth = intent.getIntExtra("frameWidth", 800);
+		frameHeight = intent.getIntExtra("frameHeight", 600);
 		this.init(); //initialize WAD data structures
-
-		Thread.currentThread().setName("CameraThread");
-
-		//java camera view works alot faster than native camera view
-		if(ConfigurationParameters.getCameraMode()){
-			mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.native_camera_surface_view);
-		} else {
-			mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.java_camera_surface_view);
-		}
-		mOpenCvCameraView.setCvCameraViewListener(this);
-		mOpenCvCameraView.setCameraIndex(1);
-		mOpenCvCameraView.enableFpsMeter();
-	}
-
-	/**
-	 * Set up the {@link android.app.ActionBar}.
-	 */
-
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.camera_view_listener_activty, menu);
-		return true;
-	}
-
-	@Override
-	public void onPause()
-	{
-		super.onPause();
-		if (mOpenCvCameraView != null)
-			mOpenCvCameraView.disableView();
-	}
-
-	@Override
-	public void onResume()
-	{
-		super.onResume();
 		OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_3, this, mLoaderCallback);
+		return Service.START_NOT_STICKY;
+
 	}
 
-	@Override
-	public void onStop() {
-		super.onStop();
-		this.finish();
-	}
-
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event)
-	{
-		if ((keyCode == KeyEvent.KEYCODE_BACK))
-		{
-			finish();
-		}
-		return super.onKeyDown(keyCode, event);
-	}
 
 	@Override
 	public void onDestroy() {
 		Log.d(TAG, Thread.currentThread().getName() + " :: service has been closed");
 
 		super.onDestroy();
-		mOpenCvCameraView.disableView();
 		this.queueManager.killManager();
 		for (Thread t : frameAnalyzerTasks) {
 			try {
@@ -257,23 +186,6 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 		}
 	}
 
-	@Override
-	public void onCameraViewStarted(int width, int height) {		
-	}
-
-	@Override
-	public void onCameraViewStopped() {
-	}
-
-	@Override
-	public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
-
-		Mat gray = inputFrame.gray().clone();
-		Mat rgba = inputFrame.rgba().clone();
-		Long timestamp = System.currentTimeMillis();
-		queueManager.putFrame(new CapturedFrame(timestamp, rgba, gray));
-		return rgba;
-	}
 
 
 	//init data structures
@@ -323,7 +235,7 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 		}
 
 		Alerter alerter;
-
+		String alertActivity = ConfigurationParameters.ALERT_ACTIVITY;
 		try {
 			Class<?> clazz = Class.forName(ConfigurationParameters.getAlertType());
 			Constructor<?> constructor = clazz.getConstructor(Context.class);
@@ -331,34 +243,19 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 		} catch (Exception e) {
 			alerter = new SimpleAlerter(this);
 		}
-
 		Alerter noIdenAlerter = new SpeechAlerter(this,this.getString(R.string.no_iden_message));
 		Alerter EmeregencyAlerter = new SpeechAlerter(this,this.getString(R.string.emergency_message));
+
+		Alerter guiNoIdenAlerter = new GuiAlerter(this, alertActivity, intentMessenger, noIdenAlerter);
+		Alerter guiEmeAlerterAlerter = new GuiAlerter(this, alertActivity, intentMessenger, EmeregencyAlerter);
+		Alerter guiAlerter = new GuiAlerter(this, alertActivity, intentMessenger, alerter);
 
 		WindowAnalyzer windowAnalyzer = new WindowAnalyzer(resultQueueList, indicatorList);
 		Predictor predictor = new WakeAppPredictor();
 
-		AlerterContainer alerterContainer = new AlerterContainer(alerter, noIdenAlerter, EmeregencyAlerter);
-		boolean collectMode = ConfigurationParameters.getCollectMode();
+		AlerterContainer alerterContainer = new AlerterContainer(guiAlerter, guiNoIdenAlerter, guiEmeAlerterAlerter);
 
-		if(collectMode){
-			// Disable collection mode if google voice is not installed
-			PackageManager pm = getPackageManager();
-			List<ResolveInfo> activities = pm.queryIntentActivities(new Intent(
-					RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
-			if (activities.size() == 0) {
-				collectMode = false;
-				Log.d(TAG, "google voice is not installed on this device");
-			}
-		}
-		String android_id = Secure.getString(getBaseContext().getContentResolver(),
-				Secure.ANDROID_ID);
-		
-		DataCollector dataCollector = null;
-		if(collectMode){
-			dataCollector = new DataCollector(voiceHandler, new FtpSender(), new CsvFileWriter(android_id)); 
-		}
-		this.detector = new DetectorTask(alerterContainer, windowAnalyzer, predictor, dataCollector);
+		this.detector = new DetectorTask(alerterContainer, windowAnalyzer, predictor, null);
 
 		this.detectionTask = new Thread(this.detector);
 		detectionTask.setName("DetectionTask");
@@ -366,50 +263,34 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 
 		EmergencyHandler emergencyHandler = new EmergencyHandler(detector);
 		frameAnalyzer1.setEmergencyHandler(emergencyHandler);
-	}
 
-	public void startVoiceRecognition(){
-
-		MediaPlayer mPlayer = MediaPlayer.create(this, R.raw.tiredness);
-		mPlayer.start();
-		mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-
-			@Override
-			public void onCompletion(MediaPlayer mp) {
-				Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-				intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-						RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-				intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
-						"WakeAppDriver Voice Recognition");
-				startActivityForResult(intent, REQUEST_CODE);
-			}
-		});
-
+		JavaCameraTask cameraRunnable = new JavaCameraTask(frameWidth, frameHeight, queueManager);
+		new CameraHandlerThread().openCamera(cameraRunnable);
 	}
 
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
-			ArrayList<String> matches = data
-					.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-			boolean found = false;
-			int drowsinessAssumption = -1;
-			for(String curr : matches) {
-				if(!found){
-					try{
-						int temp = Integer.parseInt(curr);
-						if(temp>=1 && temp<=10){
-							drowsinessAssumption = temp;
-						}
-						found = true;
-					}
-					catch(Exception e){
-					}
-				}
-			}
-			ConfigurationParameters.setDrosinessAssumption(drowsinessAssumption);
-		}
-		//super.onActivityResult(requestCode, resultCode, data);
+	public IBinder onBind(Intent arg0) {
+		//no support for binding
+		return null;
 	}
 
+	private static class CameraHandlerThread extends HandlerThread {
+		Handler mHandler = null;
+		JavaCameraTask cameraTask;
+		
+		CameraHandlerThread() {
+			super("CameraThread");
+			start();
+			mHandler = new Handler(getLooper());
+		}
+
+		void openCamera(JavaCameraTask cameraTask) {
+			this.cameraTask = cameraTask;
+			mHandler.post(cameraTask);
+		}
+		
+		void kill(){
+			cameraTask.kill();
+		}
+	}
 }

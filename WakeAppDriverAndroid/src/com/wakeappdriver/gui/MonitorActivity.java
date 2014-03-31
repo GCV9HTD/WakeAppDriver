@@ -1,10 +1,10 @@
 package com.wakeappdriver.gui;
 
 import com.wakeappdriver.R;
-import com.wakeappdriver.classes.IntentMessenger;
-import com.wakeappdriver.enums.Enums.Action;
-import com.wakeappdriver.implementations.ActivityIntentHandler;
-import com.wakeappdriver.interfaces.IntentHandler;
+import com.wakeappdriver.configuration.Enums.Action;
+import com.wakeappdriver.framework.IntentMessenger;
+import com.wakeappdriver.framework.implementations.intenthandlers.ActivityIntentHandler;
+import com.wakeappdriver.framework.interfaces.IntentHandler;
 
 import android.os.Bundle;
 import android.app.Activity;
