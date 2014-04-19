@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.GET_TASKS" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -25,11 +26,9 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
-        
         <activity
             android:name="com.wakeappdriver.gui.StartScreenActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="landscape">
+            android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -55,6 +54,15 @@
                 android:value="com.wakeappdriver.gui.StartScreenActivity" />
         </activity>
         <activity
+            android:name="com.wakeappdriver.gui.MonitorActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:label="@string/title_activity_monitor"
+            android:parentActivityName="com.wakeappdriver.gui.StartScreenActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.wakeappdriver.gui.StartScreenActivity" />
+        </activity>
+        <activity
             android:name="com.wakeappdriver.gui.DebugActivity"
             android:configChanges="keyboardHidden|orientation"
             android:parentActivityName="com.wakeappdriver.gui.StartScreenActivity"
@@ -67,10 +75,9 @@
             android:name="com.wakeappdriver.gui.HelpActivity"
             android:label="@string/title_activity_help" >
         </activity>
-        <activity
-            android:name="com.wakeappdriver.gui.HelpActivity"
-            android:label="@string/title_activity_help" >
-        </activity>
+
+        <service android:name="com.wakeappdriver.framework.services.GoService" >
+        </service>
     </application>
 
 </manifest>

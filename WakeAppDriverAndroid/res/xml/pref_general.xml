@@ -1,23 +1,26 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="Settings"
+    android:summary="bla bla">
 
+    
     <!-- Sound -->
     <PreferenceCategory
         android:key="categoty_Sound_key"
         android:title="@string/categoty_Sound_title" >
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="example_checkbox"
-            android:title="Enable sound alert" />
-
-        <!-- NOTE: ListPreference's summary should be set to its value by the activity code. -->
 
         <ListPreference
             android:defaultValue="@string/pref_alert_type_list_defaultValue"
             android:entries="@array/pref_alert_types_list_names"
             android:entryValues="@array/pref_alert_types_list_values"
-            android:key="alert_list_key"
+            android:key="alert_type"
             android:persistent="true"
             android:title="@string/pref_alert_type_title" />
+
+        <SeekBarPreference
+            android:defaultValue="500"
+            android:key="volume"
+            android:max="1000"
+            android:title="@string/pref_volume" />
     </PreferenceCategory>
 
     <!-- Display -->
@@ -26,7 +29,7 @@
         android:title="@string/category_Display_title" >
         <CheckBoxPreference
             android:defaultValue="true"
-            android:key="drowsiness_bar"
+            android:key="display_drowsiness_bar"
             android:title="@string/pref_display_bar_title" />
     </PreferenceCategory>
 

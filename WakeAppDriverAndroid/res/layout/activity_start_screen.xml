@@ -9,35 +9,45 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".StartScreenActivity" >
 
-    <LinearLayout
-        android:id="@+id/linearLayout1"
+    <TextView
+        android:id="@+id/TextAppName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginLeft="50dp" >
+        android:layout_centerVertical="true"
+        android:drawableTop="@drawable/logo_final"
+        android:text="WakeAppDriver\n\n"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textSize="34sp" />
 
-        <Button
+    <RelativeLayout
+        android:id="@+id/LayoutButtons1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+
+        <ImageButton
             android:id="@+id/button_Settings"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="36dp"
-            android:onClick="toSettingsScreen"
-            android:text="@string/Button_Settings"
-            android:textColor="#FFFFFFFF"
-            android:textSize="30sp"
-            android:textStyle="bold|italic" />
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:onClick="toSettings"
+            android:src="@drawable/ic_action_settings"
+            android:contentDescription="@string/action_settings"/>
 
-        <Button
+        <ImageButton
             android:id="@+id/button_Go"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="36dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
             android:onClick="toMonitoring"
-            android:text="@string/goButton"
-            android:textColor="#FFFFFFFF"
-            android:textSize="30sp"
-            android:textStyle="bold|italic" />
-    </LinearLayout>
+            android:src="@drawable/ic_action_play"
+            android:contentDescription="@string/goButton"/>
+
+    </RelativeLayout>
+
+    
 
 </RelativeLayout>

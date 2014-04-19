@@ -24,7 +24,9 @@ public class SimpleAlerter implements Alerter, OnInitListener{
 	@Override
 	public void alert() {
 		Log.i(TAG, Thread.currentThread().getName() + " :: ALERT");
-		tts.speak("Hey, Wake Up, Driver!", TextToSpeech.QUEUE_FLUSH, null);
+		//tts.speak("Hey, Wake Up, Driver!", TextToSpeech.QUEUE_FLUSH, null);
+		
+		// Alert is sounded by the MonitorActivity.
 	}
 
 	@Override

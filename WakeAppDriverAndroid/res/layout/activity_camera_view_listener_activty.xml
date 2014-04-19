@@ -13,4 +13,15 @@
        android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:id="@+id/native_camera_surface_view" />
+    
+    <ImageButton
+        android:id="@+id/ButtonStop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:contentDescription="@string/ButtonStopMonitoring"
+        android:onClick="stopMonitoring"
+        android:src="@drawable/ic_action_stop" />
+    
 </RelativeLayout>

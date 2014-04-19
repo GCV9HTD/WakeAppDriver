@@ -50,7 +50,8 @@ import android.util.Log;
 public class GoService  extends Service{
 	private static final String TAG = "WAD";
 
-
+	private JavaCameraTask mCameraRunnable;
+	
 	private CascadeClassifier mFaceDetector;
 	private CascadeClassifier mRightEyeDetector;
 
@@ -155,6 +156,7 @@ public class GoService  extends Service{
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		Log.d(TAG, "GoService: onStartCommand() called");
 		frameWidth = intent.getIntExtra("frameWidth", 800);
 		frameHeight = intent.getIntExtra("frameHeight", 600);
 		this.init(); //initialize WAD data structures
@@ -169,6 +171,7 @@ public class GoService  extends Service{
 		Log.d(TAG, Thread.currentThread().getName() + " :: service has been closed");
 
 		super.onDestroy();
+		this.mCameraRunnable.kill();
 		this.queueManager.killManager();
 		for (Thread t : frameAnalyzerTasks) {
 			try {
@@ -190,7 +193,6 @@ public class GoService  extends Service{
 
 	//init data structures
 	private void init(){
-
 		FrameQueue frameQueue1 = new FrameQueue(FrameQueueType.PERCENT_COVERED_QUEUE);
 		//		FrameQueue frameQueue2 = new FrameQueue(10,FrameQueueType.HEAD_INCLINATION_QUEUE);
 		//		FrameQueue frameQueue3 = new FrameQueue(10,FrameQueueType.YAWN_SIZE_QUEUE);
@@ -244,7 +246,7 @@ public class GoService  extends Service{
 			alerter = new SimpleAlerter(this);
 		}
 		Alerter noIdenAlerter = new SpeechAlerter(this,this.getString(R.string.no_iden_message));
-		Alerter EmeregencyAlerter = new SpeechAlerter(this,this.getString(R.string.emergency_message));
+		Alerter EmeregencyAlerter = new SimpleAlerter(this);
 
 		Alerter guiNoIdenAlerter = new GuiAlerter(this, alertActivity, intentMessenger, noIdenAlerter);
 		Alerter guiEmeAlerterAlerter = new GuiAlerter(this, alertActivity, intentMessenger, EmeregencyAlerter);
@@ -264,8 +266,8 @@ public class GoService  extends Service{
 		EmergencyHandler emergencyHandler = new EmergencyHandler(detector);
 		frameAnalyzer1.setEmergencyHandler(emergencyHandler);
 
-		JavaCameraTask cameraRunnable = new JavaCameraTask(frameWidth, frameHeight, queueManager);
-		new CameraHandlerThread().openCamera(cameraRunnable);
+		mCameraRunnable = new JavaCameraTask(frameWidth, frameHeight, queueManager);
+		new CameraHandlerThread().openCamera(mCameraRunnable);
 	}
 
 	@Override
@@ -273,6 +275,7 @@ public class GoService  extends Service{
 		//no support for binding
 		return null;
 	}
+
 
 	private static class CameraHandlerThread extends HandlerThread {
 		Handler mHandler = null;

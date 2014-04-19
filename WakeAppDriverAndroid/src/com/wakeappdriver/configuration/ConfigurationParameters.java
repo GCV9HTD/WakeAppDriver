@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
+import android.preference.PreferenceManager;
 
 import com.wakeappdriver.R;
 import com.wakeappdriver.configuration.Enums.StartMode;
@@ -54,11 +55,38 @@ public class ConfigurationParameters {
 	public static String getAlertType() {
 		return sharedPref.getString("alertType", "SimpleAlerter");
 	}
+	
+//	public static String getAlertType(Context context) {
+//		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+//		return sharedPreferences.getString("alert_type", "ship_bell");
+//	}
+	
+	public static int getAlert(Context context) {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+		String audioFileName = sharedPreferences.getString("alert_type", "ship_bell");
+		return getAudioFile(audioFileName);
+	}
+
+	private static int getAudioFile(String audioFileName) {
+		if(audioFileName.equals("ship_bell"))
+			return R.raw.ship_bell;
+		if(audioFileName.equals("speaking_voice_wake_up_call"))
+			return R.raw.speaking_voice_wake_up_call;
+		if(audioFileName.equals("car_horn"))
+			return R.raw.car_horn;
+		// Add more alerts here.
+	return 0;
+}
 
 	public static void setAlertType(String alertType) {
 		Editor editor = sharedPref.edit();
 		editor.putString("alertType", alertType);
 		editor.apply();
+	}
+	
+	public static int getVolume(Context context) {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+		return sharedPreferences.getInt("volume", 1);
 	}
 
 	public static int getMinSamples() {
@@ -141,7 +169,7 @@ public class ConfigurationParameters {
 	}
 
 	public static boolean getCollectMode(){
-		return sharedPref.getBoolean("collectMode", true);
+		return sharedPref.getBoolean("collectMode", false);
 	}
 	
 	public static void setCollectMode(boolean isInCollectingMode){
@@ -152,6 +180,11 @@ public class ConfigurationParameters {
 
 	public static int getDrowsinessAssumption(){
 		return sharedPref.getInt("drowsinessAssumption", -1);
+	}
+	
+	public static boolean getDisplayBar(Context context){
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+		return sharedPreferences.getBoolean("display_drowsiness_bar", true);
 	}
 	
 	public static void setDrosinessAssumption(int drowsinessAssumption){

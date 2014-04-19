@@ -9,8 +9,24 @@
     tools:context=".MonitorActivity" >
 
     <TextView
+        android:id="@+id/TextMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:drawableTop="@drawable/logo_final"
+        android:text="@string/monitor_tracking_text"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textSize="22sp" />
+
+    <ImageButton
+        android:id="@+id/ButtonStop"
+        android:layout_alignParentBottom="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/ic_action_stop"
+        android:contentDescription="@string/ButtonStopMonitoring"
+        android:onClick="stopMonitoring"/>
 
 </RelativeLayout>
