@@ -1,10 +1,7 @@
 package com.wakeappdriver.framework;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
 import com.wakeappdriver.configuration.Enums.Action;
-import com.wakeappdriver.framework.interfaces.IntentHandler;
+import com.wakeappdriver.framework.interfaces.IntentListener;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -15,13 +12,13 @@ public class IntentMessenger {
 	private BroadcastReceiver broadcastReceiver;
 	private Context context;
 	private IntentFilter filter;
-	public IntentMessenger (Context context, Action[] actions, final IntentHandler intentHandler){
+	public IntentMessenger (Context context, Action[] actions, final IntentListener listener){
 		this.context = context;
 		
 		broadcastReceiver = new BroadcastReceiver(){ 
 			@Override
 			public void onReceive(Context context, Intent intent) {
-				intentHandler.handleIntent(intent);
+				listener.onListenEvent(intent);
 			}
 		};
 		filter = new IntentFilter();
@@ -34,14 +31,9 @@ public class IntentMessenger {
 		context.registerReceiver(broadcastReceiver, filter);
 
 	}
-	public void send(Action action, Map<String,String> extra){
-		Intent i = new Intent(action.name());
+	
+	public void unregister(){
+		context.unregisterReceiver(broadcastReceiver);
 
-		if(extra != null){
-			for(Entry<String,String> entry : extra.entrySet()){
-				i.putExtra(entry.getKey(),entry.getValue());
-			}
-		}
-		context.sendBroadcast(i);
 	}
 }

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,27 +13,19 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.objdetect.CascadeClassifier;
 
 import com.wakeappdriver.R;
-import com.wakeappdriver.configuration.ConfigurationParameters;
+import com.wakeappdriver.configuration.Enums.Action;
 import com.wakeappdriver.configuration.Enums.*;
-import com.wakeappdriver.framework.AlerterContainer;
 import com.wakeappdriver.framework.EmergencyHandler;
 import com.wakeappdriver.framework.FrameQueue;
 import com.wakeappdriver.framework.FrameQueueManager;
-import com.wakeappdriver.framework.IntentMessenger;
 import com.wakeappdriver.framework.ResultQueue;
 import com.wakeappdriver.framework.WindowAnalyzer;
-import com.wakeappdriver.framework.implementations.alerters.GuiAlerter;
-import com.wakeappdriver.framework.implementations.alerters.SimpleAlerter;
-import com.wakeappdriver.framework.implementations.alerters.SpeechAlerter;
 import com.wakeappdriver.framework.implementations.analyzers.PercentCoveredFrameAnalyzer;
 import com.wakeappdriver.framework.implementations.indicators.BlinkDurationIndicator;
 import com.wakeappdriver.framework.implementations.indicators.PerclosIndicator;
-import com.wakeappdriver.framework.implementations.intenthandlers.ServiceIntentHandler;
 import com.wakeappdriver.framework.implementations.predictors.WakeAppPredictor;
-import com.wakeappdriver.framework.interfaces.Alerter;
 import com.wakeappdriver.framework.interfaces.FrameAnalyzer;
 import com.wakeappdriver.framework.interfaces.Indicator;
-import com.wakeappdriver.framework.interfaces.IntentHandler;
 import com.wakeappdriver.framework.interfaces.Predictor;
 import com.wakeappdriver.framework.tasks.DetectorTask;
 import com.wakeappdriver.framework.tasks.JavaCameraTask;
@@ -47,7 +38,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.util.Log;
 
-public class GoService  extends Service{
+public class GoService extends ListenerService{
 	private static final String TAG = "WAD";
 
 	private JavaCameraTask mCameraRunnable;
@@ -60,14 +51,11 @@ public class GoService  extends Service{
 	private DetectorTask detector;
 
 	private Thread detectionTask;
+	CameraHandlerThread cameraHandlerThread;
 	private List<Thread> frameAnalyzerTasks;
 
 	private int frameWidth;
 	private int frameHeight;
-
-	private IntentMessenger intentMessenger;
-	private Action[] actions = {Action.WAD_ACTION_GET_PREDICITON};
-	private IntentHandler intentHandler;
 
 	private BaseLoaderCallback  mLoaderCallback = new BaseLoaderCallback(this) {
 		@Override
@@ -148,10 +136,6 @@ public class GoService  extends Service{
 		super.onCreate();
 		Log.d(TAG, "staring service");
 
-		this.intentHandler = new ServiceIntentHandler();
-		this.intentMessenger = new IntentMessenger(this, actions, intentHandler);	
-		this.intentMessenger.register();
-
 	}
 
 	@Override
@@ -187,6 +171,7 @@ public class GoService  extends Service{
 		} catch (InterruptedException e) {
 			Log.e(TAG, Thread.currentThread().getName() + " :: couldn't kill thread " + detectionTask.getName());
 		}
+		cameraHandlerThread.kill();
 	}
 
 
@@ -235,29 +220,11 @@ public class GoService  extends Service{
 			frameAnalyzerTasks.add(t);
 			t.start();
 		}
-
-		Alerter alerter;
-		String alertActivity = ConfigurationParameters.ALERT_ACTIVITY;
-		try {
-			Class<?> clazz = Class.forName(ConfigurationParameters.getAlertType());
-			Constructor<?> constructor = clazz.getConstructor(Context.class);
-			alerter = (Alerter)(constructor.newInstance(this));
-		} catch (Exception e) {
-			alerter = new SimpleAlerter(this);
-		}
-		Alerter noIdenAlerter = new SpeechAlerter(this,this.getString(R.string.no_iden_message));
-		Alerter EmeregencyAlerter = new SimpleAlerter(this);
-
-		Alerter guiNoIdenAlerter = new GuiAlerter(this, alertActivity, intentMessenger, noIdenAlerter);
-		Alerter guiEmeAlerterAlerter = new GuiAlerter(this, alertActivity, intentMessenger, EmeregencyAlerter);
-		Alerter guiAlerter = new GuiAlerter(this, alertActivity, intentMessenger, alerter);
-
+		
 		WindowAnalyzer windowAnalyzer = new WindowAnalyzer(resultQueueList, indicatorList);
 		Predictor predictor = new WakeAppPredictor();
 
-		AlerterContainer alerterContainer = new AlerterContainer(guiAlerter, guiNoIdenAlerter, guiEmeAlerterAlerter);
-
-		this.detector = new DetectorTask(alerterContainer, windowAnalyzer, predictor, null);
+		this.detector = new DetectorTask(windowAnalyzer, predictor, null, this);
 
 		this.detectionTask = new Thread(this.detector);
 		detectionTask.setName("DetectionTask");
@@ -267,7 +234,8 @@ public class GoService  extends Service{
 		frameAnalyzer1.setEmergencyHandler(emergencyHandler);
 
 		mCameraRunnable = new JavaCameraTask(frameWidth, frameHeight, queueManager);
-		new CameraHandlerThread().openCamera(mCameraRunnable);
+		cameraHandlerThread = new CameraHandlerThread();
+		cameraHandlerThread.openCamera(mCameraRunnable);
 	}
 
 	@Override
@@ -295,5 +263,33 @@ public class GoService  extends Service{
 		void kill(){
 			cameraTask.kill();
 		}
+	}
+
+
+	@Override
+	public Action[] getActions() {
+		/*
+		 * If we want the service to listen to actions -
+		 * return a list of those actions here 
+		 * 
+		 */
+		return new Action[0];
+	}
+
+	@Override
+	public void onListenEvent(Intent intent) {
+		
+		switch(Action.toAction(intent.getAction())){
+		/*
+		 * If we want the service to listen to actions -
+		 * implement what to do in the case of each action 
+		 * (this runs on UI thread - if interaction with the service
+		 * threads is needed then we need to synchronize)
+		 */
+		default:
+			break;
+		
+		}
+		return;
 	}
 }

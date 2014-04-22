@@ -37,14 +37,17 @@ public class Enums {
 	    }
 	}
 	public enum Action {
-		WAD_ACTION_GET_PREDICITON,
-		WAD_ACTION_ALERT;
+		WAD_ACTION_UPDATE_PREDICITON,
+		WAD_ACTION_ALERT,
+		WAD_ACTION_NO_IDEN,
+		WAD_ACTION_NONE,
+		WAD_ACTION_PROMPT_USER;
 		
 	    public static Action toAction (String action) {
 	        try {
 	            return valueOf(action);
 	        } catch (Exception ex) {
-	            return WAD_ACTION_GET_PREDICITON;
+	            return WAD_ACTION_NONE;
 	        }
 	    }
 	}

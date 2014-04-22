@@ -20,7 +20,6 @@ import org.opencv.objdetect.CascadeClassifier;
 
 import com.wakeappdriver.configuration.ConfigurationParameters;
 import com.wakeappdriver.configuration.Enums.*;
-import com.wakeappdriver.framework.AlerterContainer;
 import com.wakeappdriver.framework.EmergencyHandler;
 import com.wakeappdriver.framework.FrameQueue;
 import com.wakeappdriver.framework.FrameQueueManager;
@@ -57,7 +56,6 @@ import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.View;
 import android.view.WindowManager;
 
 
@@ -200,6 +198,7 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.camera_view_listener_activty, menu);
 		return true;
 	}
 
@@ -278,7 +277,7 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 
 	//init data structures
 	private void init(){
-
+		/**
 		FrameQueue frameQueue1 = new FrameQueue(FrameQueueType.PERCENT_COVERED_QUEUE);
 		//		FrameQueue frameQueue2 = new FrameQueue(10,FrameQueueType.HEAD_INCLINATION_QUEUE);
 		//		FrameQueue frameQueue3 = new FrameQueue(10,FrameQueueType.YAWN_SIZE_QUEUE);
@@ -366,6 +365,8 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 
 		EmergencyHandler emergencyHandler = new EmergencyHandler(detector);
 		frameAnalyzer1.setEmergencyHandler(emergencyHandler);
+		
+		**/
 	}
 
 	public void startVoiceRecognition(){
@@ -410,16 +411,6 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 			ConfigurationParameters.setDrosinessAssumption(drowsinessAssumption);
 		}
 		//super.onActivityResult(requestCode, resultCode, data);
-	}
-	
-	
-	public void stopMonitoring(View view) {
-		// Go to startScreen activity
-		Intent intent = new Intent(this, StartScreenActivity.class);
-		startActivity(intent);
-		// Disable the option to go back here (from activated screen)
-		finish();
-
 	}
 
 }

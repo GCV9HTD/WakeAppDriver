@@ -4,11 +4,11 @@ import java.util.Collection;
 import com.wakeappdriver.configuration.ConfigurationParameters;
 import com.wakeappdriver.framework.interfaces.FileWriter;
 import com.wakeappdriver.framework.interfaces.Indicator;
-import com.wakeappdriver.gui.GoActivity;
 import android.os.Handler;
 
 public class DataCollector {
-	
+//	private static final int REQUEST_CODE = 1234;
+	public static final int VOICE_RECOGNITION_CODE = 5678;
 	private Handler uiHandler;
 	private FtpSender ftpSender;
 	private FileWriter fileWriter;
@@ -47,6 +47,6 @@ public class DataCollector {
 	}
 	
 	private void triggerVoiceRecognition(){
-		uiHandler.sendEmptyMessage(GoActivity.VOICE_RECOGNITION_CODE);		
+		uiHandler.sendEmptyMessage(VOICE_RECOGNITION_CODE);		
 	}
 }

@@ -1,15 +1,17 @@
 package com.wakeappdriver.framework.tasks;
 
 import java.util.HashMap;
+
+import android.content.Intent;
 import android.util.Log;
 import com.wakeappdriver.configuration.ConfigurationParameters;
+import com.wakeappdriver.configuration.Constants;
 import com.wakeappdriver.configuration.Enums.*;
-import com.wakeappdriver.framework.AlerterContainer;
 import com.wakeappdriver.framework.WindowAnalyzer;
 import com.wakeappdriver.framework.datacollection.DataCollector;
-import com.wakeappdriver.framework.interfaces.Alerter;
 import com.wakeappdriver.framework.interfaces.Indicator;
 import com.wakeappdriver.framework.interfaces.Predictor;
+import com.wakeappdriver.framework.services.ListenerService;
 
 
 
@@ -17,12 +19,9 @@ public class DetectorTask implements Runnable {
 	private static final String TAG = "WAD";
 
 	private WindowAnalyzer windowAnalyzer;
-	private Alerter alerter;
 	private Predictor predictor;
 	private double alertThreshold;
 	private int windowSize;
-	private Alerter noIdenAlerter;
-	private Alerter emergencyAlerter;
 
 	private int learningModeDuration;
 	private int durationBetweenAlerts;
@@ -35,27 +34,27 @@ public class DetectorTask implements Runnable {
 	private Object detectorLock;
 	private int windowNumber;
 	private int numOfWindowsBetweenTwoQueries;
-	
+	private boolean collectMode;
 	private DataCollector dataCollector;
-
-	public DetectorTask(AlerterContainer alerters, WindowAnalyzer windowsAnalyzer, 
-			Predictor predictor, DataCollector dataCollector){
+	private ListenerService listenerService;
+	
+	public DetectorTask(WindowAnalyzer windowsAnalyzer, 
+			Predictor predictor, DataCollector dataCollector, ListenerService listenerService){
 		Log.d(TAG, Thread.currentThread().getName() + ":: starting Detector Task");
 		this.windowAnalyzer = windowsAnalyzer;
-		this.alerter = alerters.getGeneralAlerter();
 		this.predictor = predictor;
 		this.alertThreshold = ConfigurationParameters.getAlertThreshold();
 		this.windowSize = ConfigurationParameters.getWindowSize();
 		this.isAlive = true;
-		this.noIdenAlerter = alerters.getNoIdenAlerter();
 		this.learningModeDuration = ConfigurationParameters.getLearningModeDuration();
 		this.durationBetweenAlerts = ConfigurationParameters.getDurationBetweenAlerts();
-		this.emergencyAlerter = alerters.getEmergencyAlerter();
 		this.detectorLock = new Object();
 		this.indicators = null;
 		this.windowNumber = 0;
 		this.numOfWindowsBetweenTwoQueries = ConfigurationParameters.getNumOfWindowsBetweenTwoQueries();
 		this.dataCollector = dataCollector;
+		this.listenerService = listenerService;
+		this.collectMode = ConfigurationParameters.getCollectMode();
 	}
 	@Override
 	public void run() {	
@@ -70,7 +69,7 @@ public class DetectorTask implements Runnable {
 		long nextSleepTime = this.windowSize;
 
 
-		if(this.dataCollector!=null && !this.dataCollector.init()){
+		if (this.dataCollector != null && !this.dataCollector.init()){
 			this.dataCollector = null;
 		}
 		while(isAlive){
@@ -95,7 +94,10 @@ public class DetectorTask implements Runnable {
 
 			if(isEmergency){
 				Log.i(TAG, Thread.currentThread().getName() + ":: emergency alert");
-				emergencyAlerter.alert();
+				
+				this.listenerService.forceStartActivity(Constants.ALERT_ACTIVITY);
+				Intent intent = new Intent(Action.WAD_ACTION_ALERT.name());
+				this.listenerService.sendBroadcast(intent);
 
 				this.alertMode = false;
 				windowsSinceLastAlert = this.durationBetweenAlerts;
@@ -117,17 +119,31 @@ public class DetectorTask implements Runnable {
 			Log.v(TAG, Thread.currentThread().getName() + ":: predicting drowsiness");
 
 			prediction = predictor.predictDrowsiness(indicators);
-
+			
+			if(prediction != null){
+				Intent intent = new Intent(Action.WAD_ACTION_UPDATE_PREDICITON.name());
+				intent.putExtra(Constants.UPDATE_PRED_KEY, prediction);
+				this.listenerService.sendBroadcast(intent);
+			}
+			
 			if (alertMode) {
 				if (prediction == null) {	// system can't identify the driver
 					Log.i(TAG, Thread.currentThread().getName() + ":: did not recognize driver");
-					noIdenAlerter.alert();
+					
+					this.listenerService.forceStartActivity(Constants.CALIB_ACTIVITY);
+					Intent intent = new Intent(Action.WAD_ACTION_NO_IDEN.name());
+					this.listenerService.sendBroadcast(intent);
+					
 					this.alertMode = false;
 					windowsSinceLastAlert = this.durationBetweenAlerts;
 				}
 				else if (prediction > alertThreshold){	//driver is sleepy -> alert him
 					Log.i(TAG, Thread.currentThread().getName() + ":: reached threshhold! : " + prediction + " > " + alertThreshold);
-					alerter.alert();
+					
+					this.listenerService.forceStartActivity(Constants.ALERT_ACTIVITY);
+					Intent intent = new Intent(Action.WAD_ACTION_ALERT.name());
+					this.listenerService.sendBroadcast(intent);
+					
 					this.alertMode = false;
 					windowsSinceLastAlert = this.durationBetweenAlerts;
 				} else {	// driver is aware
@@ -149,6 +165,11 @@ public class DetectorTask implements Runnable {
 			if(this.dataCollector!=null){
 				this.dataCollector.logCurrWindow(indicators.values(), windowNumber);
 			}
+			if(this.collectMode){
+				Intent intent = new Intent(Action.WAD_ACTION_PROMPT_USER.name());
+				this.listenerService.sendBroadcast(intent);				
+			}
+			
 			nextSleepTime = this.windowSize;
 		}
 		//if(this.dataCollector!=null){
@@ -158,9 +179,6 @@ public class DetectorTask implements Runnable {
 
 	public void killDetector() {
 		Log.v(TAG, Thread.currentThread().getName() + ":: killed detector");
-		alerter.destroy();
-		noIdenAlerter.destroy();
-		emergencyAlerter.destroy();
 		dataCollector.destroy();
 		this.isAlive = false;
 	}
@@ -177,6 +195,5 @@ public class DetectorTask implements Runnable {
 				detectorLock.notifyAll();
 			}
 		}
-	}
-	
+	}	
 }

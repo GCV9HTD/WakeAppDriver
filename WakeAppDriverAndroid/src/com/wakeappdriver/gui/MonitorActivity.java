@@ -2,30 +2,16 @@ package com.wakeappdriver.gui;
 
 import com.wakeappdriver.R;
 import com.wakeappdriver.configuration.ConfigurationParameters;
+import com.wakeappdriver.configuration.Constants;
 import com.wakeappdriver.configuration.Enums.Action;
-import com.wakeappdriver.framework.IntentMessenger;
-import com.wakeappdriver.framework.implementations.intenthandlers.ActivityIntentHandler;
-import com.wakeappdriver.framework.interfaces.AlertActivity;
-import com.wakeappdriver.framework.interfaces.IntentHandler;
-import com.wakeappdriver.framework.services.GoService;
-
-import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.widget.ImageView;
 
-public class MonitorActivity extends Activity implements AlertActivity{
+public class MonitorActivity extends ListenerActivity{
 
 	private static final String TAG = "WAD";
-	private IntentMessenger intentMessenger;
-	private IntentHandler intentHandler;
-	private Action[] actions = {Action.WAD_ACTION_ALERT};
-	private MediaPlayer mPlayer;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -37,23 +23,6 @@ public class MonitorActivity extends Activity implements AlertActivity{
 		else
 			setContentView(R.layout.activity_monitor);
 
-		// Register to intentMessenger
-		this.intentHandler = new ActivityIntentHandler(this);
-		this.intentMessenger = new IntentMessenger(this, actions, this.intentHandler );	
-		intentMessenger.register();
-
-
-		int audioFile = ConfigurationParameters.getAlert(getApplicationContext());
-		mPlayer = MediaPlayer.create(this, audioFile);
-		/* Set alert volume:
-		 * The MediaPLayer.setVolume() function gets a volume between 0 to 1.
-		 * In order to transform our "real" volume (between 0 to 1000, from the settings)
-		 * we make some logarithmic transformation into [0..1].
-		 */
-		final int MAX_VOLUME = 1000;
-		int soundVolume = ConfigurationParameters.getVolume(getApplicationContext());	// The volume to be sound
-		final float volume = (float) (1 - (Math.log(MAX_VOLUME - soundVolume) / Math.log(MAX_VOLUME)));
-		mPlayer.setVolume(volume, volume);
 	}
 
 
@@ -63,19 +32,7 @@ public class MonitorActivity extends Activity implements AlertActivity{
 		return true;
 	}
 
-	@Override
-	public void onAlert() {
-		this.runOnUiThread(new Runnable() {
-			
-			@Override
-			public void run() {
-				Log.i(TAG, "MonitorActivity: onAlert() has been called");
-				mPlayer.start();
-			}
-		});
-		
-	}
-	
+
 	
 	public void stopMonitoring(View view) {
 		// kill detector and stuff according to sequence.
@@ -87,6 +44,54 @@ public class MonitorActivity extends Activity implements AlertActivity{
 		// Disable the option to go back here (from activated screen)
 		finish();
 
+	}
+
+
+	@Override
+	public Action[] getActions() {
+		return new Action[]{Action.WAD_ACTION_UPDATE_PREDICITON,
+							Action.WAD_ACTION_PROMPT_USER};
+	}
+
+
+	@Override
+	public void onListenEvent(Intent intent) {
+		/**
+		 * implement all actions monitor activity is registered to
+		 * should cover all actions in getActions()
+		 */
+		switch(Action.toAction(intent.getAction())){
+
+		case WAD_ACTION_UPDATE_PREDICITON:
+			this.onUpdatePrediction(intent.getDoubleExtra(Constants.UPDATE_PRED_KEY, -1 ));	
+			break;
+		case WAD_ACTION_PROMPT_USER:
+			this.promptUserForDrowsiness();
+		default:
+			break;
+			
+		}
+	}
+
+
+	private void promptUserForDrowsiness() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	private void onUpdatePrediction(double prediction) {
+		
+		if(prediction < 0){
+			return;
+		}
+		// TODO
+		/**
+		 * 
+		 * implement here what to do in case of prediction update
+		 * 
+		 */
+		
 	}
 
 }

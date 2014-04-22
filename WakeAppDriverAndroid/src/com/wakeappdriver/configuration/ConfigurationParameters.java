@@ -12,8 +12,6 @@ import com.wakeappdriver.configuration.Enums.StartMode;
 
 public class ConfigurationParameters {
 	
-	public static final String ALERT_ACTIVITY = "com.wakeappdriver.gui.MonitorActivity";
-
 	private static SharedPreferences sharedPref;	
 			
 	public static void init(Context context){
