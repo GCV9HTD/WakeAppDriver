@@ -134,7 +134,7 @@ public class GoService extends ListenerService{
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		Log.d(TAG, "staring service");
+		Log.d(TAG, "starting service");
 
 	}
 
@@ -165,11 +165,14 @@ public class GoService extends ListenerService{
 			}
 		}
 
-		detector.killDetector();
 		try {
+			detector.killDetector();
 			detectionTask.join(detector.getWindowSize());
 		} catch (InterruptedException e) {
 			Log.e(TAG, Thread.currentThread().getName() + " :: couldn't kill thread " + detectionTask.getName());
+		}
+		catch (NullPointerException e) {
+			Log.e(TAG, "GoService: detector is null");
 		}
 		cameraHandlerThread.kill();
 	}

@@ -44,7 +44,7 @@
             android:layout_centerVertical="true"
             android:onClick="toMonitoring"
             android:src="@drawable/ic_action_play"
-            android:contentDescription="@string/goButton"/>
+            android:contentDescription="@string/button_go"/>
 
     </RelativeLayout>
 

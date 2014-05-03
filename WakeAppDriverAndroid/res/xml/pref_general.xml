@@ -3,6 +3,7 @@
     android:summary="bla bla">
 
     
+    
     <!-- Sound -->
     <PreferenceCategory
         android:key="categoty_Sound_key"
@@ -20,7 +21,7 @@
             android:defaultValue="500"
             android:key="volume"
             android:max="1000"
-            android:title="@string/pref_volume" />
+            android:title="@string/pref_volume"/>
     </PreferenceCategory>
 
     <!-- Display -->

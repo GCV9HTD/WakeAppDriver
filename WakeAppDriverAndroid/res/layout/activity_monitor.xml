@@ -15,7 +15,7 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:drawableTop="@drawable/logo_final"
-        android:text="@string/monitor_tracking_text"
+        android:text="@string/text_monitor_tracking"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textSize="22sp" />
 
@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:src="@drawable/ic_action_stop"
-        android:contentDescription="@string/ButtonStopMonitoring"
+        android:contentDescription="@string/button_stop_monitoring"
         android:onClick="stopMonitoring"/>
 
 </RelativeLayout>

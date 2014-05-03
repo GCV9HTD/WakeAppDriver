@@ -40,7 +40,7 @@ public class DetectorTask implements Runnable {
 	
 	public DetectorTask(WindowAnalyzer windowsAnalyzer, 
 			Predictor predictor, DataCollector dataCollector, ListenerService listenerService){
-		Log.d(TAG, Thread.currentThread().getName() + ":: starting Detector Task");
+		Log.d(TAG, Thread.currentThread().getName() + "#Asa :: starting Detector Task");
 		this.windowAnalyzer = windowsAnalyzer;
 		this.predictor = predictor;
 		this.alertThreshold = ConfigurationParameters.getAlertThreshold();
@@ -55,6 +55,7 @@ public class DetectorTask implements Runnable {
 		this.dataCollector = dataCollector;
 		this.listenerService = listenerService;
 		this.collectMode = ConfigurationParameters.getCollectMode();
+		Log.d(TAG, Thread.currentThread().getName() + "#Asa :: done");
 	}
 	@Override
 	public void run() {	
@@ -95,7 +96,7 @@ public class DetectorTask implements Runnable {
 			if(isEmergency){
 				Log.i(TAG, Thread.currentThread().getName() + ":: emergency alert");
 				
-				this.listenerService.forceStartActivity(Constants.ALERT_ACTIVITY);
+				this.listenerService.forceStartActivity(Constants.MONITOR_ACTIVITY);
 				Intent intent = new Intent(Action.WAD_ACTION_ALERT.name());
 				this.listenerService.sendBroadcast(intent);
 
@@ -130,7 +131,7 @@ public class DetectorTask implements Runnable {
 				if (prediction == null) {	// system can't identify the driver
 					Log.i(TAG, Thread.currentThread().getName() + ":: did not recognize driver");
 					
-					this.listenerService.forceStartActivity(Constants.CALIB_ACTIVITY);
+					this.listenerService.forceStartActivity(Constants.MONITOR_ACTIVITY);
 					Intent intent = new Intent(Action.WAD_ACTION_NO_IDEN.name());
 					this.listenerService.sendBroadcast(intent);
 					
@@ -140,7 +141,7 @@ public class DetectorTask implements Runnable {
 				else if (prediction > alertThreshold){	//driver is sleepy -> alert him
 					Log.i(TAG, Thread.currentThread().getName() + ":: reached threshhold! : " + prediction + " > " + alertThreshold);
 					
-					this.listenerService.forceStartActivity(Constants.ALERT_ACTIVITY);
+					this.listenerService.forceStartActivity(Constants.MONITOR_ACTIVITY);
 					Intent intent = new Intent(Action.WAD_ACTION_ALERT.name());
 					this.listenerService.sendBroadcast(intent);
 					
@@ -179,7 +180,8 @@ public class DetectorTask implements Runnable {
 
 	public void killDetector() {
 		Log.v(TAG, Thread.currentThread().getName() + ":: killed detector");
-		dataCollector.destroy();
+		if(dataCollector != null) 
+			dataCollector.destroy();
 		this.isAlive = false;
 	}
 	

@@ -23,7 +23,8 @@ import android.view.View;
 public class StartScreenActivity extends Activity {
 	private static final String TAG = "WAD";
 	private StartMode startMode;
-	private Intent mGoServiceIntent;
+	private Context mContext;
+	
 
 	private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
 		@Override
@@ -47,15 +48,13 @@ public class StartScreenActivity extends Activity {
 		setContentView(R.layout.activity_start_screen);			
 		OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_3, this, mLoaderCallback);
 		ConfigurationParameters.init(this);
-		//startMode = ConfigurationParameters.getStartMode();
-		//startMode = StartMode.SERVICE;
-		startMode = StartMode.ACTIVITY;
+		mContext = getApplicationContext();
+		startMode = StartMode.SERVICE;
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		//getMenuInflater().inflate(R.menu.start_screen, menu);
 		return true;
 	}
 	
@@ -67,7 +66,7 @@ public class StartScreenActivity extends Activity {
 		switch(startMode){
 		
 		case ACTIVITY:
-			intent = new Intent(this, GoActivity.class);
+			intent = new Intent(this, CalibrationActivity.class);
 			startActivity(intent);
 			finish();
 			break;
@@ -76,14 +75,6 @@ public class StartScreenActivity extends Activity {
 			startActivity(intent);
 			break;
 		case SERVICE:
-			Context context = getApplicationContext();
-			mGoServiceIntent = new Intent(context, GoService.class);
-			View v = this.getWindow().getDecorView();
-			mGoServiceIntent.putExtra("frameWidth", v.getWidth());
-			mGoServiceIntent.putExtra("frameHeight", v.getHeight());
-			Log.d(TAG, "Calling " + mGoServiceIntent.getClass().getName() + " startService(..)");
-			context.startService(mGoServiceIntent);
-			
 			// Start monitor activity
 			intent = new Intent(this, MonitorActivity.class);
 			startActivity(intent);
@@ -109,11 +100,12 @@ public class StartScreenActivity extends Activity {
 	}
 	
 	
-	/**
-	 * Display an exit message. The user can choose whether to exit the App or not
-	 * by choosing the corresponding option. 
-	 */
+	@Override
 	public void onBackPressed() {
+		/*
+		 * Display an exit message. The user can choose whether to exit the App or not
+		 * by choosing the corresponding option. 
+		 */
 	    (new AlertDialog.Builder(this))
 	            .setTitle("Confirm exit")
 	            .setMessage("Do you want to exit WakeAppDriver?")
@@ -121,15 +113,15 @@ public class StartScreenActivity extends Activity {
 	            .setPositiveButton("Exit", new DialogInterface.OnClickListener() {
 	                @Override
 	                public void onClick(DialogInterface dialog, int which) {
-	                    // Close all if needed
-	                	//getApplicationContext().stopService(mGoServiceIntent);
+	                    // Close GoService if needed
+	                	Intent intent = new Intent(mContext, GoService.class);
+	                	mContext.stopService(intent);
 	                    finish();
 	                }
 
 	            })
 	            .show();
 	}
-	
 	
 	
 	

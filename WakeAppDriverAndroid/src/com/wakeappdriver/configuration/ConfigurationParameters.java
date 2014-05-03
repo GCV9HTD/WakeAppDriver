@@ -17,11 +17,10 @@ public class ConfigurationParameters {
 	public static void init(Context context){
 		Resources res = context.getResources();
 		sharedPref = context.getSharedPreferences(res.getString(R.string.awd_config_fname), Activity.MODE_PRIVATE);
-	
 	}
 	
 	public static int getWindowSize() {
-		return sharedPref.getInt("windowSize", 15000);
+		return sharedPref.getInt("windowSize", Constants.WINDOW_SIZE);
 	}
 
 	public static void setWindowSize(int windowSize) {
@@ -147,7 +146,7 @@ public class ConfigurationParameters {
 		editor.apply();	
 	}
 	public static long getEmergencyCooldown() {
-		return sharedPref.getLong("emergencyCooldown", (long) 3000);
+		return sharedPref.getLong("emergencyCooldown", (long) 2000);
 	}
 	
 	public static void setEmergencyCooldown(long emergencyCooldown) {

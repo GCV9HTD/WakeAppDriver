@@ -78,6 +78,12 @@
 
         <service android:name="com.wakeappdriver.framework.services.GoService" >
         </service>
+
+        <activity
+            android:name="com.wakeappdriver.gui.CalibrationActivity"
+            android:label="@string/title_activity_calibration"
+            android:screenOrientation="landscape">
+        </activity>
     </application>
 
 </manifest>
