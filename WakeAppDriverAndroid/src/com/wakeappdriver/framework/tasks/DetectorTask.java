@@ -165,17 +165,18 @@ public class DetectorTask implements Runnable {
 			}
 			if(this.dataCollector!=null){
 				this.dataCollector.logCurrWindow(indicators.values(), windowNumber);
+				//prompt the user to insert his drowsiness level
+				if(windowNumber + 1 == numOfWindowsBetweenTwoQueries){
+					Intent intent = new Intent(Action.WAD_ACTION_PROMPT_USER.name());
+					this.listenerService.forceStartActivity(Constants.MONITOR_ACTIVITY);
+					this.listenerService.sendBroadcast(intent);
+				}
 			}
-			if(this.collectMode){
-				Intent intent = new Intent(Action.WAD_ACTION_PROMPT_USER.name());
-				this.listenerService.sendBroadcast(intent);				
-			}
+			
 			
 			nextSleepTime = this.windowSize;
 		}
-		//if(this.dataCollector!=null){
-		//	this.dataCollector.destroy();
-		//}
+		
 	}
 
 	public void killDetector() {

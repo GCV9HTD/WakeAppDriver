@@ -1,5 +1,7 @@
 package com.wakeappdriver.gui;
 
+import java.util.ArrayList;
+
 import com.wakeappdriver.R;
 import com.wakeappdriver.configuration.ConfigurationParameters;
 import com.wakeappdriver.configuration.Constants;
@@ -8,11 +10,15 @@ import com.wakeappdriver.framework.services.GoService;
 
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -23,9 +29,11 @@ public class MonitorActivity extends ListenerActivity{
 
 	private static final String TAG = "WAD";
 	private static final String CLASS_NAME = "MonitorActivity";
+	private static final int REQUEST_CODE = 1234;
 
 	private Dialog alertDialog;
 	private MediaPlayer mPlayer;
+	private String drowsinessPromptMethod;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +54,7 @@ public class MonitorActivity extends ListenerActivity{
 		//intent.putExtra("frameHeight", v.getHeight());
 		Log.d(TAG, "Calling " + intent.getClass().getName() + " startService(..)");
 		context.startService(intent);
+		this.drowsinessPromptMethod = ConfigurationParameters.getDrowsinessPromptMethod();
 	}
 
 
@@ -180,6 +189,73 @@ public class MonitorActivity extends ListenerActivity{
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Starts a Voice Recognition to get the drowsiness level and updating the Shared Preferences variable drowsinessLevel
+	 */
+	private void startVoiceRecognition(){
+
+		MediaPlayer mPlayer = MediaPlayer.create(this, R.raw.tiredness);
+		mPlayer.start();
+		mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+
+			@Override
+			public void onCompletion(MediaPlayer mp) {
+				Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+				intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+						RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+				intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
+						"WakeAppDriver Voice Recognition");
+				startActivityForResult(intent, REQUEST_CODE);
+				
+				//starting voice activity, setting delay of few seconds to turn it off in case of error
+				Handler handler=new Handler();
+				Runnable r=new Runnable()
+				{
+				    public void run() 
+				    {
+				    	finishActivity(REQUEST_CODE); 			
+				    }
+				};
+				handler.postDelayed(r, 8000);
+				
+			}
+		});
+
+	}
+	
+	/**
+	 * get the result from the voice recognition activity and save it
+	 */
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
+			ArrayList<String> matches = data
+					.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+			boolean found = false;
+			int drowsinessLevel = -1;
+			for(String curr : matches) {
+				if(!found){
+					try{
+						int temp = Integer.parseInt(curr);
+						if(temp>=1 && temp<=10){
+							drowsinessLevel = temp;
+						}
+						found = true;
+					}
+					catch(Exception e){
+					}
+				}
+			}
+			ConfigurationParameters.setDrowsinessLevel(drowsinessLevel);
+		}
+		else{
+			//finish the voice recognition if error results
+			this.finishActivity(REQUEST_CODE);
+		}
+	}
+	
+	
 
 	/**
 	 * When the driver's face & eyes cannot be identified.
@@ -221,9 +297,47 @@ public class MonitorActivity extends ListenerActivity{
 		
 	}
 	
+	/**
+	 * Starts a Voice Recognition / GUI screen to get the drowsiness level and updating the Shared Preferences variable drowsinessLevel
+	 */
 	private void promptUserForDrowsiness() {
-		// TODO Auto-generated method stub
+		if(this.drowsinessPromptMethod.equals("Voice")){
+			startVoiceRecognition();
+		}
+		else if (this.drowsinessPromptMethod.equals("Gui")){
+			getDrowsinessLevelFromGui();
+		}
+	}
+	
+	private void getDrowsinessLevelFromGui(){
+		AlertDialog.Builder b = new Builder(this);
+	    b.setTitle("Your Drowsiness Level");
+	    String[] types = {"1", "2","3","4","5","6","7","8","9","10"};
+	    b.setItems(types, new OnClickListener() {
 
+	        @Override
+	        public void onClick(DialogInterface dialog, int which) {
+
+	            dialog.dismiss();
+	            if(which >=0 && which <10){
+	            	ConfigurationParameters.setDrowsinessLevel(which + 1);
+	            }
+	        }
+
+	    });
+	    final AlertDialog alertDialog = b.create();
+	    b.show().getListView().setSelection(3);
+		
+	    //Remove the dialog after few seconds
+	    Handler handler=new Handler();
+		Runnable r=new Runnable()
+		{
+		    public void run() 
+		    {
+		    	alertDialog.dismiss();		
+		    }
+		};
+		handler.postDelayed(r, 8000);
 	}
 
 

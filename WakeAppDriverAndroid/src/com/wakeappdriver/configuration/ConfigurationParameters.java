@@ -166,7 +166,7 @@ public class ConfigurationParameters {
 	}
 
 	public static boolean getCollectMode(){
-		return sharedPref.getBoolean("collectMode", false);
+		return sharedPref.getBoolean("collectMode", true);
 	}
 	
 	public static void setCollectMode(boolean isInCollectingMode){
@@ -175,8 +175,24 @@ public class ConfigurationParameters {
 		editor.apply();
 	}
 
-	public static int getDrowsinessAssumption(){
-		return sharedPref.getInt("drowsinessAssumption", -1);
+	public static int getDrowsinessLevel(){
+		return sharedPref.getInt("drowsinessLevel", -1);
+	}
+	
+	public static void setDrowsinessLevel(int drowsinessLevel){
+		Editor editor = sharedPref.edit();
+		editor.putInt("drowsinessLevel", drowsinessLevel);
+		editor.apply();
+	}
+	
+	public static String getDrowsinessPromptMethod(){
+		return sharedPref.getString("drowsinessLevelMethod", "Voice");
+	}
+	
+	public static void setDrowsinessPromptMethod(String drowsinessLevelMethod){
+		Editor editor = sharedPref.edit();
+		editor.putString("drowsinessLevelMethod", drowsinessLevelMethod);
+		editor.apply();
 	}
 	
 	public static boolean getDisplayBar(Context context){
@@ -184,15 +200,10 @@ public class ConfigurationParameters {
 		return sharedPreferences.getBoolean("display_drowsiness_bar", true);
 	}
 	
-	public static void setDrosinessAssumption(int drowsinessAssumption){
-		Editor editor = sharedPref.edit();
-		editor.putInt("drowsinessAssumption", drowsinessAssumption);
-		editor.apply();
-	}
 	
 	public static int getNumOfWindowsBetweenTwoQueries(){
 		//must be at least 2 to work properly
-		return sharedPref.getInt("numOfWindowsBetweenTwoQueries", 2);
+		return sharedPref.getInt("numOfWindowsBetweenTwoQueries", 6);
 	}
 	
 	public static void setNumOfWindowsBetweenTwoQueries(int numOfWindowsBetweenTwoQueries){

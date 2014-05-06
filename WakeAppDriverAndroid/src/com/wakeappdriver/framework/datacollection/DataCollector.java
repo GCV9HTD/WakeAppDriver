@@ -9,13 +9,12 @@ import android.os.Handler;
 public class DataCollector {
 //	private static final int REQUEST_CODE = 1234;
 	public static final int VOICE_RECOGNITION_CODE = 5678;
-	private Handler uiHandler;
 	private FtpSender ftpSender;
 	private FileWriter fileWriter;
-	public DataCollector(Handler uiHandler, FtpSender ftpSender, FileWriter fileWriter){
-		this.uiHandler = uiHandler;
-		this.ftpSender = ftpSender;
-		this.fileWriter = fileWriter;
+	
+	public DataCollector(String android_id){
+		this.ftpSender = new FtpSender();
+		this.fileWriter = new CsvFileWriter(android_id);
 	}
 	
 	public boolean init(){
@@ -35,18 +34,8 @@ public class DataCollector {
 
 	
 	public void logCurrWindow(Collection<Indicator> indicatorsValues, int windowNumber) {
-		if(windowNumber + 1 ==ConfigurationParameters.getNumOfWindowsBetweenTwoQueries()){
-			triggerVoiceRecognition();
-		}
 		
-		int drowsinessAssumption = -1;
-		if(windowNumber == 0){
-			drowsinessAssumption  = ConfigurationParameters.getDrowsinessAssumption();
-		}
-		this.fileWriter.writeToFile(indicatorsValues, windowNumber,drowsinessAssumption);
+		this.fileWriter.writeToFile(indicatorsValues, windowNumber,ConfigurationParameters.getDrowsinessLevel());
 	}
 	
-	private void triggerVoiceRecognition(){
-		uiHandler.sendEmptyMessage(VOICE_RECOGNITION_CODE);		
-	}
 }
