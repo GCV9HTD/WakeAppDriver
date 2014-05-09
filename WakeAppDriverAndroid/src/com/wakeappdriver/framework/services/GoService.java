@@ -13,6 +13,7 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.objdetect.CascadeClassifier;
 
 import com.wakeappdriver.R;
+import com.wakeappdriver.configuration.ConfigurationParameters;
 import com.wakeappdriver.configuration.Enums.Action;
 import com.wakeappdriver.configuration.Enums.*;
 import com.wakeappdriver.framework.EmergencyHandler;
@@ -20,6 +21,9 @@ import com.wakeappdriver.framework.FrameQueue;
 import com.wakeappdriver.framework.FrameQueueManager;
 import com.wakeappdriver.framework.ResultQueue;
 import com.wakeappdriver.framework.WindowAnalyzer;
+import com.wakeappdriver.framework.datacollection.CsvFileWriter;
+import com.wakeappdriver.framework.datacollection.DataCollector;
+import com.wakeappdriver.framework.datacollection.FtpSender;
 import com.wakeappdriver.framework.implementations.analyzers.PercentCoveredFrameAnalyzer;
 import com.wakeappdriver.framework.implementations.indicators.BlinkDurationIndicator;
 import com.wakeappdriver.framework.implementations.indicators.PerclosIndicator;
@@ -36,6 +40,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.provider.Settings.Secure;
 import android.util.Log;
 
 public class GoService extends ListenerService{
@@ -226,8 +231,14 @@ public class GoService extends ListenerService{
 		
 		WindowAnalyzer windowAnalyzer = new WindowAnalyzer(resultQueueList, indicatorList);
 		Predictor predictor = new WakeAppPredictor();
-
-		this.detector = new DetectorTask(windowAnalyzer, predictor, null, this);
+		
+		//create a dataCollector if the collection feature is on
+		DataCollector dataCollector = null;
+		if(ConfigurationParameters.getCollectMode()){
+			String android_id = Secure.getString(getBaseContext().getContentResolver(),Secure.ANDROID_ID);
+			dataCollector = new DataCollector(android_id); 
+		}
+		this.detector = new DetectorTask(windowAnalyzer, predictor, dataCollector, this);
 
 		this.detectionTask = new Thread(this.detector);
 		detectionTask.setName("DetectionTask");

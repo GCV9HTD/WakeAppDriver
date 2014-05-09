@@ -39,7 +39,7 @@
         <activity
             android:name="com.wakeappdriver.gui.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:icon="@drawable/ic_action_settings"
+            android:icon="@drawable/ic_bar_settings"
             android:parentActivityName="com.wakeappdriver.gui.StartScreenActivity"
             android:theme="@android:style/Theme.Holo">
             <meta-data

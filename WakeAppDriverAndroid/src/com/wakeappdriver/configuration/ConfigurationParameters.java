@@ -11,19 +11,18 @@ import com.wakeappdriver.R;
 import com.wakeappdriver.configuration.Enums.StartMode;
 
 public class ConfigurationParameters {
-	
+
 	private static SharedPreferences sharedPref;
 	private static Context mContext;
-			
+
 	public static void init(Context context){
 		Resources res = context.getResources();
 		sharedPref = context.getSharedPreferences(res.getString(R.string.awd_config_fname), Activity.MODE_PRIVATE);
 		mContext = context;
 	}
-	
+
 	/**
 	 * Get window size in milisec. Default value in defined as Constants.DEFALT_WINDOW_SIZE.
-	 * @return
 	 */
 	public static int getWindowSize() {
 		int windowSize = Constants.DEFAULT_WINDOW_SIZE;
@@ -35,7 +34,7 @@ public class ConfigurationParameters {
 		}
 		catch(Exception e) {System.out.println("#Asa error parse");}
 		return windowSize * 1000;
-		
+
 	}
 
 	public static void setWindowSize(int windowSize) {
@@ -72,7 +71,7 @@ public class ConfigurationParameters {
 	public static String getAlertType() {
 		return sharedPref.getString("alertType", "SimpleAlerter");
 	}
-	
+
 	public static int getAlert(Context context) {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 		String audioFileName = sharedPreferences.getString("alert_type", "ship_bell");
@@ -87,15 +86,15 @@ public class ConfigurationParameters {
 		if(audioFileName.equals("car_horn"))
 			return R.raw.car_horn;
 		// Add more alerts here.
-	return 0;
-}
+		return 0;
+	}
 
 	public static void setAlertType(String alertType) {
 		Editor editor = sharedPref.edit();
 		editor.putString("alertType", alertType);
 		editor.apply();
 	}
-	
+
 	public static float getVolume(Context context) {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 		int pref_volume = sharedPreferences.getInt("volume", 1);
@@ -152,17 +151,17 @@ public class ConfigurationParameters {
 	public static int getClosedAlertLimit() {
 		return sharedPref.getInt("closedAlertLimit", 1000);
 	}
-	
+
 	public static void setClosedAlertLimit(int closedAlertLimit) {
 		Editor editor = sharedPref.edit();
 		editor.putInt("closedAlertLimit", closedAlertLimit);
 		editor.apply();		
 	}
-	
+
 	public static double getBlinkLimit() {
 		return sharedPref.getFloat("blinkLimit", (float) 0.4);
 	}
-	
+
 	public static void setBlinkLimit(double blinkLimit) {
 		Editor editor = sharedPref.edit();
 		editor.putFloat("blinkLimit", (float)blinkLimit);
@@ -171,7 +170,7 @@ public class ConfigurationParameters {
 	public static long getEmergencyCooldown() {
 		return sharedPref.getLong("emergencyCooldown", (long) 2000);
 	}
-	
+
 	public static void setEmergencyCooldown(long emergencyCooldown) {
 		Editor editor = sharedPref.edit();
 		editor.putLong("emergencyCooldown", emergencyCooldown);
@@ -181,7 +180,7 @@ public class ConfigurationParameters {
 		String modeName = sharedPref.getString("StartMode", StartMode.ACTIVITY.name());
 		return StartMode.toStartMode(modeName);
 	}
-	
+
 	public static void setStartMode(StartMode startMode) {
 		Editor editor = sharedPref.edit();
 		editor.putString("StartMode", startMode.name());
@@ -189,35 +188,51 @@ public class ConfigurationParameters {
 	}
 
 	public static boolean getCollectMode(){
-		return sharedPref.getBoolean("collectMode", false);
+		return sharedPref.getBoolean("collectMode", true);
 	}
-	
+
 	public static void setCollectMode(boolean isInCollectingMode){
 		Editor editor = sharedPref.edit();
 		editor.putBoolean("collectMode", isInCollectingMode);
 		editor.apply();
 	}
 
-	public static int getDrowsinessAssumption(){
-		return sharedPref.getInt("drowsinessAssumption", -1);
+	public static int getDrowsinessLevel(){
+		return sharedPref.getInt("drowsinessLevel", -1);
 	}
-	
+
 	public static boolean toDisplayBar(){
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 		return sharedPreferences.getBoolean("display_drowsiness_bar", true);
 	}
-	
-	public static void setDrosinessAssumption(int drowsinessAssumption){
+
+	public static void setDrowsinessLevel(int drowsinessLevel){
 		Editor editor = sharedPref.edit();
-		editor.putInt("drowsinessAssumption", drowsinessAssumption);
+		editor.putInt("drowsinessLevel", drowsinessLevel);
 		editor.apply();
 	}
-	
+
+	public static String getDrowsinessPromptMethod(){
+		return sharedPref.getString("drowsinessLevelMethod", "Voice");
+	}
+
+	public static void setDrowsinessPromptMethod(String drowsinessLevelMethod){
+		Editor editor = sharedPref.edit();
+		editor.putString("drowsinessLevelMethod", drowsinessLevelMethod);
+		editor.apply();
+	}
+
+	public static boolean getDisplayBar(Context context){
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+		return sharedPreferences.getBoolean("display_drowsiness_bar", true);
+	}
+
+
 	public static int getNumOfWindowsBetweenTwoQueries(){
 		//must be at least 2 to work properly
-		return sharedPref.getInt("numOfWindowsBetweenTwoQueries", 2);
+		return sharedPref.getInt("numOfWindowsBetweenTwoQueries", 6);
 	}
-	
+
 	public static void setNumOfWindowsBetweenTwoQueries(int numOfWindowsBetweenTwoQueries){
 		Editor editor = sharedPref.edit();
 		editor.putInt("numOfWindowsBetweenTwoQueries", numOfWindowsBetweenTwoQueries);

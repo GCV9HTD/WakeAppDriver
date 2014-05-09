@@ -408,7 +408,7 @@ public class GoActivity extends Activity implements CvCameraViewListener2 {
 					}
 				}
 			}
-			ConfigurationParameters.setDrosinessAssumption(drowsinessAssumption);
+			ConfigurationParameters.setDrowsinessLevel(drowsinessAssumption);
 		}
 		//super.onActivityResult(requestCode, resultCode, data);
 	}
