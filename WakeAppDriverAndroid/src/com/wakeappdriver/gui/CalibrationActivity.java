@@ -22,6 +22,7 @@ import com.wakeappdriver.configuration.ConfigurationParameters;
 import com.wakeappdriver.configuration.Constants;
 import com.wakeappdriver.framework.services.GoService;
 import android.os.Bundle;
+import android.os.Looper;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -44,12 +45,17 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 	private Rect eyearea_right;
 	private int mAbsoluteFaceSize = 0;
 
+	private static enum Status {ANALYZE, WAIT};
+	private Status mStatus;
+
 	/** Number of frames which the drive's face can be detected in */
 	private float ident_frames = 0;
 	/** Number of frames which the drive's face can NOT be detected in */
 	private float no_ident_frames = 0;
-	
+
 	private CameraBridgeViewBase   mOpenCvCameraView;
+
+	private Context mContext;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -57,13 +63,16 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 		setContentView(R.layout.activity_calibration);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		init();
+
+		mContext = this;
 	}
 
 
 	private void init() {
 		this.ident_frames = 0;
 		this.no_ident_frames = 0;
-		
+		mStatus = Status.ANALYZE;
+
 		Thread.currentThread().setName("CameraThread");
 		//java camera view works alot faster than native camera view
 		if(ConfigurationParameters.getCameraMode()){
@@ -102,14 +111,14 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 		startActivity(intent);
 		finish();
 	}
-	
+
 	/**
 	 * Stop this activity and start StartScreenActivity
 	 */
 	public void toStartScreen(View view) {
 		// Stop camera task and analyzer
 		this.onStop();
-		
+
 		Intent intent = new Intent(this, StartScreenActivity.class);
 		this.startActivity(intent);
 	}
@@ -210,7 +219,7 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 		super.onStop();
 		if (mOpenCvCameraView != null)
 			mOpenCvCameraView.disableView();
-		
+
 		finish();
 	}
 
@@ -225,16 +234,28 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 
 	@Override
 	public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
-		/*
-		 * Analyze camera frames.
-		 * Check the process' status at each frame/
-		 */
+		/* Analyze camera frames.
+		 * Check the process' status at each frame  */
 		checkCalibrationStatus();
 		System.out.println(ident_frames + "   " + no_ident_frames);
-		
+
 		Mat rgba = inputFrame.rgba();
 		mGray = inputFrame.gray();
 
+		if(mStatus == Status.ANALYZE) {
+			analyzeFrame();
+		}
+		// Else - status is WAIT (means don't analyze frames)
+		else {
+			// Do nothing
+		}
+
+		// Return the original frame, to be shown on the screen.
+		return rgba;
+	}
+
+
+	private void analyzeFrame() {
 		Rect r = detectFace();
 		if(r == null) {
 			// No face detection
@@ -248,9 +269,6 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 			this.ident_frames++;
 			this.no_ident_frames--;
 		}
-
-		// Return the original frame, to be shown on the screen.
-		return rgba;
 	}
 
 
@@ -267,10 +285,11 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 		}
 		if(this.no_ident_frames >= Constants.MIN_NO_IDENT_CALIB_FRAMES) {
 			Log.i(TAG, CLASS_NAME + ": Calibration failed. no_ident_frames = " + this.no_ident_frames);
-			// TODO popup a message. Currently throws exception since it's impossible to show a dialog
-			// from a running thread.
-			//popupFailMessage();
-			
+			// Reset counters and update status
+			this.ident_frames = 0;
+			this.no_ident_frames = 0;
+			mStatus = Status.WAIT;
+			popupFailMessage();
 		}
 		// Reset negative counters values
 		this.ident_frames = this.ident_frames < 0 ? 0 : this.ident_frames;
@@ -283,18 +302,27 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 	 * The user can choose between "retry" and "exit".
 	 */
 	private void popupFailMessage() {
-		(new AlertDialog.Builder(this))
-		.setTitle("Well...")
-		.setMessage("The calibration process failed. In order to success, the system must "+
-					"detect your face and eyes. Please try again.")
-		.setNegativeButton("Exit", null)
-		.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+		//this.onPause();
+		Log.i(TAG, CLASS_NAME + ": Calibration failed. Showing message");
+		this.runOnUiThread(new Runnable() {
+
 			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				init();
+			public void run() {
+
+				(new AlertDialog.Builder(mContext))
+				.setTitle("Well...")
+				.setMessage("The calibration process failed. In order to success, the system must "+
+						"detect your face and eyes. Please try again.")
+						.setNegativeButton("Exit", null)
+						.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								init();
+							}
+						})
+						.show();
 			}
-		})
-		.show();
+		});
 	}
 
 
@@ -302,14 +330,14 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 		if(r == null) {
 			return false;
 		}
-		
+
 		eyearea_right = new Rect(r.x + r.width / 16,
 				(int) (r.y + (r.height / 4.5)),
 				(r.width - 2 * r.width / 16) / 2, (int) (r.height / 3.0));
-//		eyearea_left = new Rect(r.x + r.width / 16
-//				+ (r.width - 2 * r.width / 16) / 2,
-//				(int) (r.y + (r.height / 4.5)),
-//				(r.width - 2 * r.width / 16) / 2, (int) (r.height / 3.0));
+		//		eyearea_left = new Rect(r.x + r.width / 16
+		//				+ (r.width - 2 * r.width / 16) / 2,
+		//				(int) (r.y + (r.height / 4.5)),
+		//				(r.width - 2 * r.width / 16) / 2, (int) (r.height / 3.0));
 
 		//detect eyes with classifier
 		return getEyeRect(mRightEyeDetector, eyearea_right);

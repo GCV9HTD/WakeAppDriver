@@ -1,14 +1,9 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    android:title="Settings"
-    android:summary="bla bla">
-
-    
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     
     <!-- Sound -->
     <PreferenceCategory
         android:key="categoty_Sound_key"
-        android:title="@string/categoty_Sound_title" >
-
+        android:title="@string/pref_title_sound">
         <ListPreference
             android:defaultValue="@string/pref_alert_type_list_defaultValue"
             android:entries="@array/pref_alert_types_list_names"
@@ -21,17 +16,40 @@
             android:defaultValue="500"
             android:key="volume"
             android:max="1000"
-            android:title="@string/pref_volume"/>
+            android:title="@string/pref_volume" />
     </PreferenceCategory>
 
     <!-- Display -->
     <PreferenceCategory
         android:key="category_Display_key"
-        android:title="@string/category_Display_title" >
+        android:title="@string/pref_title_display" >
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="display_drowsiness_bar"
             android:title="@string/pref_display_bar_title" />
     </PreferenceCategory>
 
+    <!-- Debug -->
+    <PreferenceCategory
+        android:key="categoty_debug_key"
+        android:title="@string/pref_title_debug" >
+        <SeekBarPreference
+            android:defaultValue="300"
+            android:key="sesitivity_scale"
+            android:max="1000"
+            android:title="@string/pref_title_sensitivity" />
+
+        <EditTextPreference
+            android:key="window_size"
+            android:inputType="number"
+            android:defaultValue="15"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:negativeButtonText="Cancel"
+            android:positiveButtonText="OK"
+            android:title="@string/pref_window_size"
+            android:summary="Window size in sec"/>
+        
+    </PreferenceCategory>
+    
 </PreferenceScreen>

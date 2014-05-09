@@ -12,8 +12,8 @@ public class Constants {
 	/** Minimum face-and-eyes-detected frames required to approve that calibration succeeded */  
 	public static final int MIN_CALIB_FRAMES = 20;
 	/** Minimum "no detection" frames required to fail the calibration process */  
-	public static final int MIN_NO_IDENT_CALIB_FRAMES = 4 * MIN_CALIB_FRAMES;
-	/** Window size in milisec */
-	public static final int WINDOW_SIZE = 6000;
+	public static final int MIN_NO_IDENT_CALIB_FRAMES = 3 * MIN_CALIB_FRAMES;
+	/** Default window size in sec */
+	public static final int DEFAULT_WINDOW_SIZE = 15;
 
 }

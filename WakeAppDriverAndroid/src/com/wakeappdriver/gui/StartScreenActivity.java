@@ -13,17 +13,24 @@ import com.wakeappdriver.R;
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.text.Layout;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
+import android.view.ViewGroup;
 
 public class StartScreenActivity extends Activity {
 	private static final String TAG = "WAD";
 	private StartMode startMode;
 	private Context mContext;
+	
+	private AlertDialog mExitMessage;
 	
 
 	private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
@@ -50,6 +57,11 @@ public class StartScreenActivity extends Activity {
 		ConfigurationParameters.init(this);
 		mContext = getApplicationContext();
 		startMode = StartMode.SERVICE;
+		
+//		if(savedInstanceState != null && savedInstanceState.getBoolean("ExitMessageShown",true))
+//			mExitMessage.show();
+//		else
+//			setExitMessage();
 	}
 
 	@Override
@@ -106,21 +118,38 @@ public class StartScreenActivity extends Activity {
 		 * Display an exit message. The user can choose whether to exit the App or not
 		 * by choosing the corresponding option. 
 		 */
-	    (new AlertDialog.Builder(this))
-	            .setTitle("Confirm exit")
-	            .setMessage("Do you want to exit WakeAppDriver?")
-	            .setNegativeButton("Cancel", null)
-	            .setPositiveButton("Exit", new DialogInterface.OnClickListener() {
-	                @Override
-	                public void onClick(DialogInterface dialog, int which) {
-	                    // Close GoService if needed
-	                	Intent intent = new Intent(mContext, GoService.class);
-	                	mContext.stopService(intent);
-	                    finish();
-	                }
+	    setExitMessage();
+	    mExitMessage.show();
+	}
 
-	            })
-	            .show();
+	private void setExitMessage() {
+		Builder builder = new AlertDialog.Builder(this); 
+		builder.setTitle("Confirm exit");
+		builder.setMessage("Do you want to exit WakeAppDriver?");
+		builder  .setNegativeButton("Cancel", null);
+		builder.setPositiveButton("Exit", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				// Close GoService if needed
+				Intent intent = new Intent(mContext, GoService.class);
+				mContext.stopService(intent);
+				finish();
+			}
+
+		});
+		mExitMessage = builder.create();
+	}
+
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+	    super.onSaveInstanceState(outState);
+
+	    if(mExitMessage != null && mExitMessage.isShowing()) {
+	        // close dialog to prevent leaked window
+	    	mExitMessage.dismiss();
+	        outState.putBoolean("ExitMessageShown", true);
+	    }
 	}
 	
 	

@@ -26,7 +26,7 @@ public class AlertActivity extends ListenerActivity{
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		// Decide which activity layout to show, according to "display bar" setting
-		boolean displayBar = ConfigurationParameters.getDisplayBar(getApplicationContext());
+		boolean displayBar = ConfigurationParameters.toDisplayBar();
 		if(displayBar)
 			setContentView(R.layout.activity_monitor_with_bar);
 		else
@@ -42,14 +42,7 @@ public class AlertActivity extends ListenerActivity{
 
 		int audioFile = ConfigurationParameters.getAlert(getApplicationContext());
 		mPlayer = MediaPlayer.create(this, audioFile);
-		/* Set alert volume:
-		 * The MediaPLayer.setVolume() function gets a volume between 0 to 1.
-		 * In order to transform our "real" volume (between 0 to 1000, from the settings)
-		 * we make some logarithmic transformation into [0..1].
-		 */
-		final int MAX_VOLUME = 1000;
-		int soundVolume = ConfigurationParameters.getVolume(getApplicationContext());	// The volume to be sound
-		final float volume = (float) (1 - (Math.log(MAX_VOLUME - soundVolume) / Math.log(MAX_VOLUME)));
+		float volume = ConfigurationParameters.getVolume(getApplicationContext());
 		mPlayer.setVolume(volume, volume);
 	}
 

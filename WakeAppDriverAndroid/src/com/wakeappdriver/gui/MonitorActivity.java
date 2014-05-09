@@ -24,8 +24,11 @@ public class MonitorActivity extends ListenerActivity{
 	private static final String TAG = "WAD";
 	private static final String CLASS_NAME = "MonitorActivity";
 
+	/** Dialog box for alert */
 	private Dialog alertDialog;
 	private MediaPlayer mPlayer;
+	/** Dialog box for no-identify message */ 
+	private Dialog noIdenDialog;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -209,7 +212,6 @@ public class MonitorActivity extends ListenerActivity{
 	            .setPositiveButton("Calibrate", new DialogInterface.OnClickListener() {
 	                @Override
 	                public void onClick(DialogInterface dialog, int which) {
-	                    // Close GoService if needed
 	                	Intent intent = new Intent(context, CalibrationActivity.class);
 	                	intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 	                	context.startActivity(intent);
@@ -222,7 +224,7 @@ public class MonitorActivity extends ListenerActivity{
 	}
 	
 	private void promptUserForDrowsiness() {
-		// TODO Auto-generated method stub
+		// TODO this is for data collector
 
 	}
 
@@ -253,7 +255,7 @@ public class MonitorActivity extends ListenerActivity{
 	 */
 	private void setLeyout() {
 		// Decide which activity layout to show, according to "display bar" setting
-		boolean displayBar = ConfigurationParameters.getDisplayBar(getApplicationContext());
+		boolean displayBar = ConfigurationParameters.toDisplayBar();
 		if(displayBar)
 			setContentView(R.layout.activity_monitor_with_bar);
 		else
@@ -262,14 +264,12 @@ public class MonitorActivity extends ListenerActivity{
 
 	/**
 	 * Creates and prepares the audio player for alerting.
-	 * You can call MediaPlayer.start() after this method finished.  
+	 * You can call MediaPlayer.start() only after you called this one.  
 	 */
 	private void initAudiofile() {
 		int audioFile = ConfigurationParameters.getAlert(getApplicationContext());
 		mPlayer = MediaPlayer.create(this, audioFile);
-		final int MAX_VOLUME = 1000;
-		int soundVolume = ConfigurationParameters.getVolume(getApplicationContext());	// The volume to be sound
-		final float volume = (float) (1 - (Math.log(MAX_VOLUME - soundVolume) / Math.log(MAX_VOLUME)));
+		float volume = ConfigurationParameters.getVolume(getApplicationContext());
 		mPlayer.setVolume(volume, volume);
 		mPlayer.setLooping(true);
 	}
