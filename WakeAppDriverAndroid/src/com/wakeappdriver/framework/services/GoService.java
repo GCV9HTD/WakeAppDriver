@@ -21,9 +21,7 @@ import com.wakeappdriver.framework.FrameQueue;
 import com.wakeappdriver.framework.FrameQueueManager;
 import com.wakeappdriver.framework.ResultQueue;
 import com.wakeappdriver.framework.WindowAnalyzer;
-import com.wakeappdriver.framework.datacollection.CsvFileWriter;
 import com.wakeappdriver.framework.datacollection.DataCollector;
-import com.wakeappdriver.framework.datacollection.FtpSender;
 import com.wakeappdriver.framework.implementations.analyzers.PercentCoveredFrameAnalyzer;
 import com.wakeappdriver.framework.implementations.indicators.BlinkDurationIndicator;
 import com.wakeappdriver.framework.implementations.indicators.PerclosIndicator;
@@ -157,7 +155,7 @@ public class GoService extends ListenerService{
 
 	@Override
 	public void onDestroy() {
-		Log.d(TAG, Thread.currentThread().getName() + " :: service has been closed");
+		Log.e(TAG, Thread.currentThread().getName() + " :: service has been closed");
 
 		super.onDestroy();
 		this.mCameraRunnable.kill();
@@ -179,6 +177,7 @@ public class GoService extends ListenerService{
 		catch (NullPointerException e) {
 			Log.e(TAG, "GoService: detector is null");
 		}
+
 		cameraHandlerThread.kill();
 	}
 

@@ -1,0 +1,11 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <bitmap android:src="@drawable/empty_bar"/>
+    </item>
+    <item>
+        <clip
+                android:clipOrientation="vertical"
+                android:gravity="bottom"
+                android:drawable="@drawable/full_bar"/>
+    </item>
+</layer-list>

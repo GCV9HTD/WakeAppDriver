@@ -40,7 +40,6 @@ public class DetectorTask implements Runnable {
 	
 	public DetectorTask(WindowAnalyzer windowsAnalyzer, 
 			Predictor predictor, DataCollector dataCollector, ListenerService listenerService){
-		Log.d(TAG, Thread.currentThread().getName() + "#Asa :: starting Detector Task");
 		this.windowAnalyzer = windowsAnalyzer;
 		this.predictor = predictor;
 		this.alertThreshold = ConfigurationParameters.getAlertThreshold();
@@ -55,7 +54,6 @@ public class DetectorTask implements Runnable {
 		this.dataCollector = dataCollector;
 		this.listenerService = listenerService;
 		this.collectMode = ConfigurationParameters.getCollectMode();
-		Log.d(TAG, Thread.currentThread().getName() + "#Asa :: done");
 	}
 	@Override
 	public void run() {	
@@ -91,6 +89,10 @@ public class DetectorTask implements Runnable {
 				} catch (InterruptedException e) {
 					continue;
 				}
+			}
+			
+			if (!isAlive) {
+				return;
 			}
 
 			if(isEmergency){
@@ -181,9 +183,12 @@ public class DetectorTask implements Runnable {
 
 	public void killDetector() {
 		Log.v(TAG, Thread.currentThread().getName() + ":: killed detector");
-		if(dataCollector != null) 
-			dataCollector.destroy();
-		this.isAlive = false;
+		synchronized (detectorLock) {
+			if(dataCollector != null) 
+				dataCollector.destroy();
+			this.isAlive = false;
+			detectorLock.notifyAll();
+		}
 	}
 	
 	public int getWindowSize() {

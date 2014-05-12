@@ -3,6 +3,31 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_centerInParent="true"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/acd_id_progress_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="40sp" />
+
+        <com.wakeappdriver.gui.VerticalProgressBar
+            android:id="@+id/acd_id_progress_bar"
+            style="@style/vertical_progress_bar" />
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Drowsiness level"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </LinearLayout>
+    
     <ImageButton
         android:id="@+id/ButtonStop"
         android:layout_width="wrap_content"
@@ -12,24 +37,5 @@
         android:contentDescription="@string/button_stop_monitoring"
         android:onClick="stopMonitoring"
         android:src="@drawable/ic_action_stop" />
-
-    <TextView
-        android:id="@+id/textView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/ButtonStop"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="224dp"
-        android:text="TBD drowsiness bar"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <ProgressBar
-        android:id="@+id/progressBar1"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="76dp" />
 
 </RelativeLayout>

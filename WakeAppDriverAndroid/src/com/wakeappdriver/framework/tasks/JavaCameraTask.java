@@ -26,7 +26,7 @@ public class JavaCameraTask implements Runnable,PreviewCallback {
 	public static final int CAMERA_ID_FRONT = 98;
 
 	private static final int MAGIC_TEXTURE_ID = 10;
-	private static final String TAG = "JavaCameraView";
+	private static final String TAG = "JavaCameraTask";
 
 	private byte mBuffer[];
 	private Mat[] mFrameChain;
@@ -229,10 +229,10 @@ public class JavaCameraTask implements Runnable,PreviewCallback {
 
 	protected void releaseCamera() {
 		synchronized (this) {
+			Log.e(TAG, "camera released entered");
 			if (mCamera != null) {
 				mCamera.stopPreview();
 				mCamera.setPreviewCallback(null);
-
 				mCamera.release();
 			}
 			mCamera = null;
@@ -321,6 +321,7 @@ public class JavaCameraTask implements Runnable,PreviewCallback {
 
 		if(!connectCamera(mFrameWidth, mFrameHeight)){
 			Log.e(TAG,"failed to connect camera");
+			mCamera.release();
 			return;
 		}
 	}

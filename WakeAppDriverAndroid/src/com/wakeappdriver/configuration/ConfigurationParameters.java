@@ -29,10 +29,9 @@ public class ConfigurationParameters {
 		try {
 			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 			String pref_window_size = sharedPreferences.getString("window_size", "");
-			System.out.println("#Asa pref_window_size = " + pref_window_size);
 			windowSize = Integer.parseInt(pref_window_size);
 		}
-		catch(Exception e) {System.out.println("#Asa error parse");}
+		catch(Exception e) { }
 		return windowSize * 1000;
 
 	}
@@ -85,6 +84,8 @@ public class ConfigurationParameters {
 			return R.raw.speaking_voice_wake_up_call;
 		if(audioFileName.equals("car_horn"))
 			return R.raw.car_horn;
+		if(audioFileName.equals("hapoel_beer_sheva"))
+			return R.raw.hapoel_beer_sheva;
 		// Add more alerts here.
 		return 0;
 	}
@@ -119,7 +120,7 @@ public class ConfigurationParameters {
 	}
 
 	public static int getLearningModeDuration() {
-		return sharedPref.getInt("learningModeDuration", 2);
+		return sharedPref.getInt("learningModeDuration", 0);
 	}
 
 	public static void setLearningModeDuration(int learningModeDuration) {
@@ -188,7 +189,7 @@ public class ConfigurationParameters {
 	}
 
 	public static boolean getCollectMode(){
-		return sharedPref.getBoolean("collectMode", true);
+		return sharedPref.getBoolean("collectMode", false);
 	}
 
 	public static void setCollectMode(boolean isInCollectingMode){
