@@ -60,7 +60,6 @@
             android:name="com.wakeappdriver.gui.MonitorActivity"
             android:configChanges="keyboardHidden|orientation"
             android:label="@string/title_activity_monitor"
-            android:screenOrientation="landscape"
             android:parentActivityName="com.wakeappdriver.gui.StartScreenActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

@@ -1,7 +1,6 @@
 package com.wakeappdriver.gui;
 
 import java.util.ArrayList;
-
 import com.wakeappdriver.R;
 import com.wakeappdriver.configuration.ConfigurationParameters;
 import com.wakeappdriver.configuration.Constants;
@@ -24,6 +23,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 public class MonitorActivity extends ListenerActivity{
 
@@ -43,23 +43,15 @@ public class MonitorActivity extends ListenerActivity{
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		/*
-		 * see:
-		 * https://github.com/mgrzechocinski/AndroidClipDrawableExample
-		 */
+		
 		setLeyout();
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		startGoService();
 		initAlertDialog();
 		initAudiofile();
 		
-		Context context = getApplicationContext();
-		Intent intent = new Intent(context, GoService.class);
-		//View v = this.getWindow().getDecorView();
-		//intent.putExtra("frameWidth", v.getWidth());
-		//intent.putExtra("frameHeight", v.getHeight());
-		Log.d(TAG, "Calling " + intent.getClass().getName() + " startService(..)");
-		context.startService(intent);
 		this.drowsinessPromptMethod = ConfigurationParameters.getDrowsinessPromptMethod();
+		
 	}
 
 
@@ -90,16 +82,7 @@ public class MonitorActivity extends ListenerActivity{
 		.show();
 	}
 	
-	private void stopService(Class<?> service) {
-		try{
-		Context context = this;
-		Intent intent = new Intent(this, service);
-		context.stopService(intent);
-		}
-		catch(Exception e) {
-			Log.e(TAG, CLASS_NAME + ": stopService error: " + e.getStackTrace());
-		}
-	}
+	
 
 	/**
 	 * Stops the monitoring process. 
@@ -108,8 +91,10 @@ public class MonitorActivity extends ListenerActivity{
 		// Stop GoService
 		this.stopService(GoService.class);
 
-		if(mPlayer.isPlaying())
+		if(mPlayer.isPlaying()) {
 			mPlayer.stop();
+		}
+		mPlayer.release();
 		// Go to startScreen activity
 		Intent intent = new Intent(this, StartScreenActivity.class);
 		startActivity(intent);
@@ -346,13 +331,24 @@ public class MonitorActivity extends ListenerActivity{
 
 
 	private void onUpdatePrediction(double prediction) {
-
 		if(prediction < 0){
 			return;
 		}
-		// TODO update drowsiness bar
+		// Update drowsiness bar:
+		VerticalProgressBar progressBar = (VerticalProgressBar) findViewById(R.id.acd_id_progress_bar);
+		TextView progressValueTextView = (TextView) findViewById(R.id.acd_id_progress_value);
+		progressBar.setCurrentValue((int) (prediction * 10000));
+		progressValueTextView.setText((int) (prediction*100) + "%");
 
 	}
+	
+	
+	private void startGoService() {
+		Context context = getApplicationContext();
+		Intent intent = new Intent(context, GoService.class);
+		context.startService(intent);
+	}
+	
 	
 	/**
 	 * Creates and prepares alert dialog box (you can call AlertDialog.show() after
@@ -388,6 +384,18 @@ public class MonitorActivity extends ListenerActivity{
 		float volume = ConfigurationParameters.getVolume(getApplicationContext());
 		mPlayer.setVolume(volume, volume);
 		mPlayer.setLooping(true);
+	}
+	
+	
+	private void stopService(Class<?> service) {
+		try{
+		Context context = this;
+		Intent intent = new Intent(this, service);
+		context.stopService(intent);
+		}
+		catch(Exception e) {
+			Log.e(TAG, CLASS_NAME + ": stopService error: " + e.getStackTrace());
+		}
 	}
 
 }

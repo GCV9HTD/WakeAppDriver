@@ -76,12 +76,7 @@ public class StartScreenActivity extends Activity {
 		Intent intent;
 
 		switch(startMode){
-		
-		case ACTIVITY:
-			intent = new Intent(this, CalibrationActivity.class);
-			startActivity(intent);
-			finish();
-			break;
+
 		case DEBUG:
 			intent = new Intent(this, DebugActivity.class);
 			startActivity(intent);

@@ -61,11 +61,13 @@
         <item>Ship bell</item>
         <item>Speaking voice</item>
         <item>Car horns</item>
+        <item >Hapoel Beer Sheva</item>
     </string-array>
     <string-array name="pref_alert_types_list_values">
         <item>ship_bell</item>
         <item>speaking_voice_wake_up_call</item>
         <item>car_horn</item>
+        <item >hapoel_beer_sheva</item>
     </string-array>
     <string name="pref_display_bar_title">Show drowsiness bar</string>
     <string name="pref_alert_type_list_defaultValue">ship_bell</string>
