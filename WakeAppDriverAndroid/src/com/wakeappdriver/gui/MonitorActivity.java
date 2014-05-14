@@ -17,6 +17,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.view.Menu;
@@ -32,11 +33,14 @@ public class MonitorActivity extends ListenerActivity{
 	private static final int REQUEST_CODE = 1234;
 
 	/** Dialog box for alert */
-	private Dialog alertDialog;
+	private Dialog mAlertDialog;
 	private MediaPlayer mPlayer;
 
 	/** Dialog box for no-identify message */ 
-	private Dialog noIdenDialog;
+	private Dialog mNoIdenDialog;
+	/** Dialog box for warning that the monitor will stop if OK is pressed */
+	private Dialog mStopMonitorDialog;
+	
 	private String drowsinessPromptMethod;
 
 
@@ -49,6 +53,8 @@ public class MonitorActivity extends ListenerActivity{
 		startGoService();
 		initAlertDialog();
 		initAudiofile();
+		initNoIdentDialog();
+		initStopMonitorDialog();
 		
 		this.drowsinessPromptMethod = ConfigurationParameters.getDrowsinessPromptMethod();
 		
@@ -64,24 +70,27 @@ public class MonitorActivity extends ListenerActivity{
 
 	@Override
 	public void onBackPressed() {
-		/*
-		 * Display a dialog (text message with OK/Cancel buttons)
-		 * which inform the user that going back from this activity will stop
-		 * the monitoring process.
-		 */
-		(new AlertDialog.Builder(this))
-		.setTitle("NOTICE")
-		.setMessage("The application will stop tracking you.")
-		.setNegativeButton("Cancel", null)
-		.setPositiveButton("Stop tracking me", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				stopMonitoring(null);
-			}
-		})
-		.show();
+		Log.i(TAG, CLASS_NAME + ": onBackedPressed");
+		mStopMonitorDialog.show();
 	}
+
 	
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		Log.i(TAG, CLASS_NAME + ": configuration changed. New config: " + newConfig.toString());
+		super.onConfigurationChanged(newConfig);
+		// Restore shown messages (if exists):
+		if(mAlertDialog.isShowing()) {
+			mAlertDialog.show();
+		}
+		else if(mNoIdenDialog.isShowing()) {
+			mNoIdenDialog.show();
+		}
+		else if(mStopMonitorDialog.isShowing()) {
+			mStopMonitorDialog.show();
+		}
+			
+	}
 	
 
 	/**
@@ -133,7 +142,13 @@ public class MonitorActivity extends ListenerActivity{
 			this.promptUserForDrowsiness();
 			break;
 		case WAD_ACTION_ALERT:
-			onAlert();
+			// Alert only if data collector is off
+			if(ConfigurationParameters.getCollectMode()) {
+				Log.d(TAG, "Alertting! Data collector is on, so no message is popped.");
+			}
+			else {
+				onAlert();
+			}
 			break;
 		case WAD_ACTION_NO_IDEN:
 			onNoIdent();
@@ -150,18 +165,18 @@ public class MonitorActivity extends ListenerActivity{
 	 */
 	public void onAlert() {
 		Log.d(TAG, CLASS_NAME + ": starting alert");
-		alertDialog.show();
+		mAlertDialog.show();
 		mPlayer.start();
 	}
 	
 	/**
 	 * Stops alerting.
 	 * NOTE: This must be public for now, to enable the OK button to call it
-	 * from xml file (Asa).
+	 * from xml file (#Asa).
 	 */
 	public void offAlert(View view) {
 		Log.d(TAG, CLASS_NAME + ": shutting alert off");
-		alertDialog.dismiss();
+		mAlertDialog.dismiss();
 		/* We can't call mPlayer.play() right after we called mPlayer.stop().
 		 * Alternatives:
 		 *   1. pause() -> play()
@@ -251,49 +266,51 @@ public class MonitorActivity extends ListenerActivity{
 	 * When the driver's face & eyes cannot be identified.
 	 */
 	private void onNoIdent() {
-		final Context context = getApplicationContext();
 		// First, stop the GoService
 		this.stopService(GoService.class);
 		
-		/*
-		 * Display a message with 2 options: go to start screen or
-		 * to calibration screen. 
-		 */
-	    (new AlertDialog.Builder(this))
-	            .setTitle("Notice")
-	            .setMessage("The system could not detect your face and eyes. Please calibrate your device " +
-	            			"so your face can be seen.")
-	            .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface arg0, int arg1) {
-						Intent intent = new Intent(context, StartScreenActivity.class);
-						intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-						context.startActivity(intent);
-						finish();
-					}
-				})
-	            .setPositiveButton("Calibrate", new DialogInterface.OnClickListener() {
-	                @Override
-	                public void onClick(DialogInterface dialog, int which) {
-	                	Intent intent = new Intent(context, CalibrationActivity.class);
-	                	intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-	                	context.startActivity(intent);
-	                    finish();
-	                }
+	    mNoIdenDialog.show();
+	}
 
-	            })
-	            .show();
+
+	private void initNoIdentDialog() {
+		final Context context = getApplicationContext();
+		Builder b = new AlertDialog.Builder(this); 
+		b.setTitle("Notice");
+		b.setMessage("The system could not detect your face and eyes. Please calibrate your device " +
+				"so your face can be seen.");
+		b.setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+				Intent intent = new Intent(context, StartScreenActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				context.startActivity(intent);
+				finish();
+			}
+		});
+		b.setPositiveButton("Calibrate", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				Intent intent = new Intent(context, CalibrationActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				context.startActivity(intent);
+				finish();
+			}
+
+		});
+		b.setCancelable(false);
 		
+		mNoIdenDialog = b.create();
 	}
 	
 	/**
 	 * Starts a Voice Recognition / GUI screen to get the drowsiness level and updating the Shared Preferences variable drowsinessLevel
 	 */
 	private void promptUserForDrowsiness() {
-		if(this.drowsinessPromptMethod.equals("Voice")){
+		if(this.drowsinessPromptMethod.equalsIgnoreCase("Voice")){
 			startVoiceRecognition();
 		}
-		else if (this.drowsinessPromptMethod.equals("Gui")){
+		else if (this.drowsinessPromptMethod.equalsIgnoreCase("Gui")){
 			getDrowsinessLevelFromGui();
 		}
 	}
@@ -337,9 +354,15 @@ public class MonitorActivity extends ListenerActivity{
 		// Update drowsiness bar:
 		VerticalProgressBar progressBar = (VerticalProgressBar) findViewById(R.id.acd_id_progress_bar);
 		TextView progressValueTextView = (TextView) findViewById(R.id.acd_id_progress_value);
-		progressBar.setCurrentValue((int) (prediction * 10000));
-		progressValueTextView.setText((int) (prediction*100) + "%");
-
+		// Set maximal value of the bar as 150% of the current alert threshold.
+		double max_bar_value = ConfigurationParameters.getAlertThreshold() * 1.5;
+		progressBar.setCurrentValue((int) (prediction * 10000 / max_bar_value));
+		int drowsiness_percent = (int) (prediction * 100 / max_bar_value);
+		// Drowsiness percent shell not be over 100, so make it 100 if it's above.
+		drowsiness_percent = drowsiness_percent > 100 ? 100 : drowsiness_percent;
+		progressValueTextView.setText(drowsiness_percent + "%");
+		
+		System.out.println("#Asa prediction = " + prediction + "   set value to " + (prediction * 100 / max_bar_value) + "%");
 	}
 	
 	
@@ -355,12 +378,26 @@ public class MonitorActivity extends ListenerActivity{
 	 * this method finished). 
 	 */
 	private void initAlertDialog() {
-		alertDialog = new Dialog(this);
-		alertDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-		alertDialog.setContentView(getLayoutInflater().inflate(R.layout.alert_popup_message, null));
-		alertDialog.setCanceledOnTouchOutside(false);
+		mAlertDialog = new Dialog(this);
+		mAlertDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+		mAlertDialog.setContentView(getLayoutInflater().inflate(R.layout.alert_popup_message, null));
+		mAlertDialog.setCanceledOnTouchOutside(false);
 	}
 
+	
+	private void initStopMonitorDialog() {
+		Builder b = new AlertDialog.Builder(this);
+		b.setTitle("NOTICE");
+		b.setMessage("The application will stop tracking you.");
+		b.setNegativeButton("Cancel", null);
+		b.setPositiveButton("Stop tracking me", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				stopMonitoring(null);
+			}
+		});
+		mStopMonitorDialog = b.create();
+	}
 
 	/**
 	 * Sets the layout for this activity according to the settings.

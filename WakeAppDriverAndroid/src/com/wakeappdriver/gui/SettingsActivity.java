@@ -1,11 +1,18 @@
 package com.wakeappdriver.gui;
 
+import com.wakeappdriver.R;
+
 import android.app.Activity;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
+import android.preference.ListPreference;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 
-public class SettingsActivity extends Activity{
+public class SettingsActivity extends Activity {
 	
 	public static String TAG = "WAD";
 	
@@ -17,19 +24,11 @@ public class SettingsActivity extends Activity{
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new SettingsFragment())
                 .commit();
-        
-        Log.d(TAG, Thread.currentThread().getName() + " :: After display");
-      //  PreferenceManager.setDefaultValues(this, R.xml.advanced_preferences, false);
+        // Set default values as defined in pref_general file
+        PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
        
     }
-	
-//	@Override
-//	public void onConfigurationChanged (Configuration newConfig){
-//	    super.onConfigurationChanged(newConfig);
-//	    
-//	    ConfigurationParameters.setAlertType("asa");
-//	}
-	
+
 }
 	
 	

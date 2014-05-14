@@ -50,6 +50,19 @@
             android:title="@string/pref_window_size"
             android:summary="Window size in sec"/>
         
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="switch_data_collector"
+            android:title="@string/pref_data_collector_title" />
+        
+        <ListPreference
+            android:defaultValue="@string/pref_data_collector_mode_defaultValue"
+            android:entries="@array/pref_data_collector_mode_names"
+            android:entryValues="@array/pref_data_collector_mode_values"
+            android:key="data_collector_mode"
+            android:persistent="true"
+            android:title="@string/pref_data_collector_mode_title"
+            android:dependency="switch_data_collector" />"
     </PreferenceCategory>
     
 </PreferenceScreen>

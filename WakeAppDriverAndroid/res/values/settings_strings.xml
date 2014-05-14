@@ -76,5 +76,16 @@
     <string name="pref_title_sensitivity">Sensitivity</string>
     <string name="pref_sensitivity_description">How much sensitive is the tracking. Set it to high value if you are tired.</string>
     <string name="pref_window_size">Window size</string>
+    <string-array name="pref_data_collector_mode_names">
+        <item >Voice</item>
+        <item >GUI</item>
+    </string-array>
+    <string-array name="pref_data_collector_mode_values">
+        <item >voice</item>
+        <item >gui</item>
+    </string-array>
+    <string name="pref_data_collector_mode_defaultValue">gui</string>
+    <string name="pref_data_collector_mode_title">Data collector mode</string>
+    <string name="pref_data_collector_title">Data collector</string>
 
 </resources>

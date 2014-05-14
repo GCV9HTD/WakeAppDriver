@@ -54,11 +54,14 @@ public class ConfigurationParameters {
 
 	public static double getAlertThreshold() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-		float pref_threshold = sharedPreferences.getInt("sesitivity_scale", 300);
+		float pref_sensitivity = sharedPreferences.getInt("sesitivity_scale", 300);
 		final int MAX_THRESHOLD = 1000;
-		//final float threshold = (float) (1 - (Math.log(MAX_THRESHOLD - pref_threshold) / Math.log(MAX_THRESHOLD)));
-		// Sensitivity scale is between [0..1] so value 0.95 means high sensitivity, which is low threshold.
-		return 1 - (pref_threshold / MAX_THRESHOLD);
+		// Normal pref_threshold from [0..1000] into [0..0.2]. Also set it to (1 - pref_sensitivity)
+		// since the sensitivity scale is opposites to the threshold scale.
+		double pref_threshold = 1 - (pref_sensitivity / MAX_THRESHOLD);
+		// [0..1] to [0..0.2]
+		double normaled_threshold = pref_threshold * 0.2;
+		return normaled_threshold;
 	}
 
 	public static void setAlertThreshold(double alertThreshold) {
@@ -86,6 +89,7 @@ public class ConfigurationParameters {
 			return R.raw.car_horn;
 		if(audioFileName.equals("hapoel_beer_sheva"))
 			return R.raw.hapoel_beer_sheva;
+			
 		// Add more alerts here.
 		return 0;
 	}
@@ -120,7 +124,7 @@ public class ConfigurationParameters {
 	}
 
 	public static int getLearningModeDuration() {
-		return sharedPref.getInt("learningModeDuration", 0);
+		return sharedPref.getInt("learningModeDuration", 1);
 	}
 
 	public static void setLearningModeDuration(int learningModeDuration) {
@@ -169,7 +173,7 @@ public class ConfigurationParameters {
 		editor.apply();	
 	}
 	public static long getEmergencyCooldown() {
-		return sharedPref.getLong("emergencyCooldown", (long) 2000);
+		return sharedPref.getLong("emergencyCooldown", (long) 10000);
 	}
 
 	public static void setEmergencyCooldown(long emergencyCooldown) {
@@ -189,7 +193,8 @@ public class ConfigurationParameters {
 	}
 
 	public static boolean getCollectMode(){
-		return sharedPref.getBoolean("collectMode", false);
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+		return sharedPreferences.getBoolean("switch_data_collector", false);
 	}
 
 	public static void setCollectMode(boolean isInCollectingMode){
@@ -214,7 +219,8 @@ public class ConfigurationParameters {
 	}
 
 	public static String getDrowsinessPromptMethod(){
-		return sharedPref.getString("drowsinessLevelMethod", "Voice");
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+		return sharedPreferences.getString("data_collector_mode", "gui");
 	}
 
 	public static void setDrowsinessPromptMethod(String drowsinessLevelMethod){

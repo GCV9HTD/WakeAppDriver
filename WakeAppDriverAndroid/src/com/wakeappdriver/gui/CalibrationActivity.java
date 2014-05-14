@@ -20,19 +20,19 @@ import org.opencv.objdetect.Objdetect;
 import com.wakeappdriver.R;
 import com.wakeappdriver.configuration.ConfigurationParameters;
 import com.wakeappdriver.configuration.Constants;
-import com.wakeappdriver.framework.services.GoService;
 import android.os.Bundle;
-import android.os.Looper;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 public class CalibrationActivity extends Activity implements CvCameraViewListener2 {
 
@@ -55,7 +55,8 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 
 	private CameraBridgeViewBase   mOpenCvCameraView;
 
-	private Context mContext;
+	private Dialog mCalibFailedDialog;
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -63,10 +64,33 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 		setContentView(R.layout.activity_calibration);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		init();
-
-		mContext = this;
 	}
 
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		return true;
+	}
+
+
+	@Override
+	public void onBackPressed() {
+		Intent intent = new Intent(this, StartScreenActivity.class);
+		startActivity(intent);
+		finish();
+	}
+	
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		Log.i(TAG, CLASS_NAME + ": configuration changed. New config: " + newConfig.toString());
+		super.onConfigurationChanged(newConfig);
+		// Restore shown messages (if exists):
+		if(mCalibFailedDialog.isShowing()) {
+			mCalibFailedDialog.show();
+		}
+	}
+	
 
 	private void init() {
 		this.ident_frames = 0;
@@ -83,22 +107,12 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 		mOpenCvCameraView.setCvCameraViewListener(this);
 		mOpenCvCameraView.setCameraIndex(1);
 		mOpenCvCameraView.enableFpsMeter();
+		
+		initCalibFailedDialog();
 	}
 
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		return true;
-	}
-
-
-	@Override
-	public void onBackPressed() {
-		Intent intent = new Intent(this, StartScreenActivity.class);
-		startActivity(intent);
-		finish();
-	}
+	
 
 
 	/**
@@ -302,25 +316,12 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 	 * The user can choose between "retry" and "exit".
 	 */
 	private void popupFailMessage() {
-		//this.onPause();
 		Log.i(TAG, CLASS_NAME + ": Calibration failed. Showing message");
 		this.runOnUiThread(new Runnable() {
 
 			@Override
 			public void run() {
-
-				(new AlertDialog.Builder(mContext))
-				.setTitle("Well...")
-				.setMessage("The calibration process failed. In order to success, the system must "+
-						"detect your face and eyes. Please try again.")
-						.setNegativeButton("Exit", null)
-						.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog, int which) {
-								init();
-							}
-						})
-						.show();
+				mCalibFailedDialog.show();
 			}
 		});
 	}
@@ -380,6 +381,22 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 			return null;
 		}
 		return facesArray[0];
+	}
+	
+	
+	private void initCalibFailedDialog() {
+		Builder b = new AlertDialog.Builder(this);
+		b.setTitle("Well...");
+		b.setMessage("The calibration process failed. In order to success, the system must "+
+				"detect your face and eyes. Please try again.");
+				b.setNegativeButton("Exit", null);
+				b.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						init();
+					}
+				});
+		mCalibFailedDialog = b.create();
 	}
 
 }

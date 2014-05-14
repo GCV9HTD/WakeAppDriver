@@ -14,24 +14,21 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.text.Layout;
+import android.content.res.Configuration;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
-import android.view.ViewGroup;
 
 public class StartScreenActivity extends Activity {
 	private static final String TAG = "WAD";
 	private StartMode startMode;
 	private Context mContext;
-	
+
 	private AlertDialog mExitMessage;
-	
+
 
 	private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
 		@Override
@@ -48,20 +45,22 @@ public class StartScreenActivity extends Activity {
 			}
 		}
 	};
+	
 	Thread t = null;
+	
+	
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		System.out.println("#Asa on create called");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_start_screen);			
 		OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_3, this, mLoaderCallback);
 		ConfigurationParameters.init(this);
 		mContext = getApplicationContext();
 		startMode = StartMode.SERVICE;
-		
-//		if(savedInstanceState != null && savedInstanceState.getBoolean("ExitMessageShown",true))
-//			mExitMessage.show();
-//		else
-//			setExitMessage();
+
+		setExitMessage();
 	}
 
 	@Override
@@ -70,7 +69,21 @@ public class StartScreenActivity extends Activity {
 		return true;
 	}
 	
+	@Override
+	public void onBackPressed() {
+		// Display exit message
+		setExitMessage();
+		mExitMessage.show();
+	}
 	
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		if(mExitMessage.isShowing())
+			mExitMessage.show();
+	}
+
+
 	public void toMonitoring(View view){
 		Log.d(TAG, "entering, start mode: " + startMode.name());
 		Intent intent;
@@ -89,39 +102,34 @@ public class StartScreenActivity extends Activity {
 			finish();
 			break;
 		default:
-		
+
 		}
 	}
-	
+
 	public void goDebug(View view) {
 		Intent intent = new Intent(this, DebugActivity.class);
 		startActivity(intent);
 	}
-	
-	
+
+
 	public void toSettings(View view){
 		Log.d(TAG, "entering Settings");
-		
+
 		Intent intent = new Intent(this, SettingsActivity.class);
 		startActivity(intent);
 	}
-	
-	
-	@Override
-	public void onBackPressed() {
-		/*
-		 * Display an exit message. The user can choose whether to exit the App or not
-		 * by choosing the corresponding option. 
-		 */
-	    setExitMessage();
-	    mExitMessage.show();
-	}
+
 
 	private void setExitMessage() {
 		Builder builder = new AlertDialog.Builder(this); 
 		builder.setTitle("Confirm exit");
 		builder.setMessage("Do you want to exit WakeAppDriver?");
-		builder  .setNegativeButton("Cancel", null);
+		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				// Do nothing but disappear the dialog box.
+			}
+		});
 		builder.setPositiveButton("Exit", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -136,18 +144,5 @@ public class StartScreenActivity extends Activity {
 	}
 
 
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-	    super.onSaveInstanceState(outState);
 
-	    if(mExitMessage != null && mExitMessage.isShowing()) {
-	        // close dialog to prevent leaked window
-	    	mExitMessage.dismiss();
-	        outState.putBoolean("ExitMessageShown", true);
-	    }
-	}
-	
-	
-	
-	
 }
