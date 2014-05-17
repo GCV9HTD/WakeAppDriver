@@ -62,7 +62,7 @@
             android:key="data_collector_mode"
             android:persistent="true"
             android:title="@string/pref_data_collector_mode_title"
-            android:dependency="switch_data_collector" />"
+            android:dependency="switch_data_collector" />
     </PreferenceCategory>
     
 </PreferenceScreen>

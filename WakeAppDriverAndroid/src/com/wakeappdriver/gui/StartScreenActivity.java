@@ -52,7 +52,6 @@ public class StartScreenActivity extends Activity {
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		System.out.println("#Asa on create called");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_start_screen);			
 		OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_3, this, mLoaderCallback);
@@ -76,13 +75,6 @@ public class StartScreenActivity extends Activity {
 		mExitMessage.show();
 	}
 	
-	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
-		super.onConfigurationChanged(newConfig);
-		if(mExitMessage.isShowing())
-			mExitMessage.show();
-	}
-
 
 	public void toMonitoring(View view){
 		Log.d(TAG, "entering, start mode: " + startMode.name());

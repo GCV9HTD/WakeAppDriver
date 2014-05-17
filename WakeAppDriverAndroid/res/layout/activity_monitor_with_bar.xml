@@ -1,41 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:layout_centerInParent="true"
+    android:gravity="center"
+    android:orientation="vertical" >
 
-    <LinearLayout
-        android:layout_width="fill_parent"
+    <TextView
+        android:id="@+id/acd_id_progress_value"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:layout_centerInParent="true"
-        android:orientation="vertical" >
+        android:textSize="42sp" />
 
-        <TextView
-            android:id="@+id/acd_id_progress_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="40sp" />
+    <com.wakeappdriver.gui.VerticalProgressBar
+        android:id="@+id/acd_id_progress_bar"
+        style="@style/vertical_progress_bar" />
 
-        <com.wakeappdriver.gui.VerticalProgressBar
-            android:id="@+id/acd_id_progress_bar"
-            style="@style/vertical_progress_bar" />
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/drowsiness_level_name"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <TextView
-            android:id="@+id/textView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Drowsiness level"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-    </LinearLayout>
-    
     <ImageButton
         android:id="@+id/ButtonStop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
         android:contentDescription="@string/button_stop_monitoring"
         android:onClick="stopMonitoring"
         android:src="@drawable/ic_action_stop" />
 
-</RelativeLayout>
+</LinearLayout>

@@ -75,23 +75,6 @@ public class MonitorActivity extends ListenerActivity{
 	}
 
 	
-	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
-		Log.i(TAG, CLASS_NAME + ": configuration changed. New config: " + newConfig.toString());
-		super.onConfigurationChanged(newConfig);
-		// Restore shown messages (if exists):
-		if(mAlertDialog.isShowing()) {
-			mAlertDialog.show();
-		}
-		else if(mNoIdenDialog.isShowing()) {
-			mNoIdenDialog.show();
-		}
-		else if(mStopMonitorDialog.isShowing()) {
-			mStopMonitorDialog.show();
-		}
-			
-	}
-	
 
 	/**
 	 * Stops the monitoring process. 

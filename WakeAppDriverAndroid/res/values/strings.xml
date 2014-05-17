@@ -27,5 +27,6 @@
     <string name="button_stop_monitoring">Stop</string>
     <string name="title_activity_calibration">CalibrationActivity</string>
     <string name="button_stop_alert">OK, I\'m fine</string>
+    <string name="drowsiness_level_name">Drowsiness level</string>
 
 </resources>

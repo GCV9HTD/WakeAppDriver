@@ -33,6 +33,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.ImageButton;
 
 public class CalibrationActivity extends Activity implements CvCameraViewListener2 {
 
@@ -81,15 +83,6 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 		finish();
 	}
 	
-	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
-		Log.i(TAG, CLASS_NAME + ": configuration changed. New config: " + newConfig.toString());
-		super.onConfigurationChanged(newConfig);
-		// Restore shown messages (if exists):
-		if(mCalibFailedDialog.isShowing()) {
-			mCalibFailedDialog.show();
-		}
-	}
 	
 
 	private void init() {
@@ -111,8 +104,6 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 		initCalibFailedDialog();
 	}
 
-
-	
 
 
 	/**
@@ -251,7 +242,7 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 		/* Analyze camera frames.
 		 * Check the process' status at each frame  */
 		checkCalibrationStatus();
-		System.out.println(ident_frames + "   " + no_ident_frames);
+		Log.d(TAG, CLASS_NAME + ": #Asa  " + ident_frames   + "   " + no_ident_frames);
 
 		Mat rgba = inputFrame.rgba();
 		mGray = inputFrame.gray();
@@ -264,7 +255,6 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 			// Do nothing
 		}
 
-		// Return the original frame, to be shown on the screen.
 		return rgba;
 	}
 
@@ -275,10 +265,10 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 			// No face detection
 			this.no_ident_frames++;
 		}
-		else if(! detectEye(r)) {
-			// No eye detection
-			//this.ident_frames--;
-		}
+//		else if(! detectEye(r)) {
+//			// No eye detection
+//			//this.ident_frames--;
+//		}
 		else {
 			this.ident_frames++;
 			this.no_ident_frames--;
@@ -294,20 +284,45 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 	 */
 	private void checkCalibrationStatus() {
 		if(this.ident_frames >= Constants.MIN_CALIB_FRAMES) {
-			Log.i(TAG, CLASS_NAME + ": Calibration succeeded! ident_frames = " + this.ident_frames);
-			toMonitoring(null);
+			onCalibrationSuccess();
+			return;
 		}
 		if(this.no_ident_frames >= Constants.MIN_NO_IDENT_CALIB_FRAMES) {
-			Log.i(TAG, CLASS_NAME + ": Calibration failed. no_ident_frames = " + this.no_ident_frames);
-			// Reset counters and update status
-			this.ident_frames = 0;
-			this.no_ident_frames = 0;
-			mStatus = Status.WAIT;
-			popupFailMessage();
+			onCalibrationFail();
 		}
 		// Reset negative counters values
 		this.ident_frames = this.ident_frames < 0 ? 0 : this.ident_frames;
 		this.no_ident_frames = this.no_ident_frames < 0 ? 0 : this.no_ident_frames;
+	}
+
+
+
+	private void onCalibrationSuccess() {
+		mStatus = Status.WAIT;
+		Log.i(TAG, CLASS_NAME + ": Calibration succeeded! ident_frames = " + this.ident_frames);
+		// Show button "start" and disable button "stop":
+		final View button_start = findViewById(R.id.ButtonStart);
+		button_start.post(new Runnable() {
+			  public void run() {
+				  button_start.setVisibility(View.VISIBLE);
+				  button_start.bringToFront();
+			  }
+			});
+		final View button_stop = findViewById(R.id.ButtonStop);
+		button_stop.post(new Runnable() {
+			  public void run() {
+				  button_stop.setVisibility(View.INVISIBLE);
+			  }
+			});
+	}
+	
+	
+	private void onCalibrationFail() {
+		mStatus = Status.WAIT;
+		Log.i(TAG, CLASS_NAME + ": Calibration failed. no_ident_frames = " + this.no_ident_frames);
+		this.ident_frames = 0;
+		this.no_ident_frames = 0;
+		popupFailMessage();
 	}
 
 
