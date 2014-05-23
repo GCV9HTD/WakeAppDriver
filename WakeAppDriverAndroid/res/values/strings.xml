@@ -28,5 +28,21 @@
     <string name="title_activity_calibration">CalibrationActivity</string>
     <string name="button_stop_alert">OK, I\'m fine</string>
     <string name="drowsiness_level_name">Drowsiness level</string>
+    <string name="dialog_exit_app_title">Confirm exit</string>
+    <string name="dialog_exit_app_message">Do you want to exit WakeAppDriver?</string>
+    <string name="dialog_exit_app_neg_button">Exit</string>
+    <string name="dialog_exit_app_pos_button">Cancel</string>
+    <string name="dialog_calibration_failed_title">Sorry\.\.\.</string>
+    <string name="dialog_calibration_failed_message">Your face cannot be detected. Please try again.</string>
+    <string name="dialog_calibration_failed_neg_button">Exit</string>
+    <string name="dialog_calibration_failed_pos_button">Retry</string>
+    <string name="dialog_no_ident_title">NOTICE</string>
+    <string name="dialog_no_ident_message">The system could not detect your face and eyes. Please calibrate your device so your face can be seen.</string>
+    <string name="dialog_no_ident_neg_button">Exit</string>
+    <string name="dialog_no_ident_pos_button">Calibrate</string>
+    <string name="dialog_stop_monitoring_title">NOTICE</string>
+    <string name="dialog_stop_monitoring_message">The application will stop tracking you.</string>
+    <string name="dialog_stop_monitoring_neg_button">Cancel</string>
+    <string name="dialog_stop_monitoring_pos_button">Stop tracking me</string>
 
 </resources>

@@ -37,6 +37,15 @@
             android:contentDescription="@string/action_settings"/>
 
         <ImageButton
+            android:id="@+id/button_Calibration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:onClick="toCalibration"
+            android:src="@drawable/ic_action_dock"/>
+        
+        <ImageButton
             android:id="@+id/button_Go"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

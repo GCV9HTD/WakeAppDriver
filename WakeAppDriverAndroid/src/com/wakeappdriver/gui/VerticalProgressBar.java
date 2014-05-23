@@ -6,7 +6,7 @@ import android.util.AttributeSet;
 import android.widget.ImageView;
 
 /**
- * see:
+ * See:
  * https://github.com/mgrzechocinski/AndroidClipDrawableExample
  */
 public class VerticalProgressBar extends ImageView {

@@ -31,7 +31,6 @@ public class JavaCameraTask implements Runnable,PreviewCallback {
 	private byte mBuffer[];
 	private Mat[] mFrameChain;
 	private int mChainIdx = 0;
-	private boolean mStopThread;
 
 	protected Camera mCamera;
 	protected int mCameraIndex = 1;//CAMERA_ID_FRONT;
@@ -259,7 +258,6 @@ public class JavaCameraTask implements Runnable,PreviewCallback {
 
 		/* now we can start update thread */
 		Log.d(TAG, "Starting processing thread");
-		mStopThread = false;
 		//		mThread = new Thread(new CameraWorker());
 		//		mThread.start();
 
@@ -268,21 +266,20 @@ public class JavaCameraTask implements Runnable,PreviewCallback {
 
 	public void onPreviewFrame(byte[] frame, Camera arg1) {
 		//Log.e(TAG, "Preview Frame received. Frame size: " + Thread.currentThread().getName());
-		mFrameChain[1 - mChainIdx].put(0, 0, frame);
-		mChainIdx = 1 - mChainIdx;
-
-		Long timestamp = System.currentTimeMillis();
-		Mat rgbaDummy = mCameraFrame[mChainIdx].rgba();
-		Mat grayDummy = mCameraFrame[mChainIdx].gray();
-		CapturedFrame capturedFrame = new CapturedFrame(timestamp,rgbaDummy.clone(),grayDummy.clone());
-		queueManager.putFrame(capturedFrame);
+		synchronized (this) {
+			mFrameChain[1 - mChainIdx].put(0, 0, frame);
+			mChainIdx = 1 - mChainIdx;
+	
+			Long timestamp = System.currentTimeMillis();
+			Mat rgbaDummy = mCameraFrame[mChainIdx].rgba();
+			Mat grayDummy = mCameraFrame[mChainIdx].gray();
+			CapturedFrame capturedFrame = new CapturedFrame(timestamp,rgbaDummy.clone(),grayDummy.clone());
+			queueManager.putFrame(capturedFrame);
+			
+			mChainIdx = 1 - mChainIdx;
+			if (mCamera != null)
+				mCamera.addCallbackBuffer(mBuffer);
 		
-		mChainIdx = 1 - mChainIdx;
-		if (mCamera != null)
-			mCamera.addCallbackBuffer(mBuffer);
-		
-		if(mStopThread){
-			this.releaseCamera();
 		}
 	}
 
@@ -326,6 +323,6 @@ public class JavaCameraTask implements Runnable,PreviewCallback {
 		}
 	}
 	public void kill() {
-		mStopThread = true;
+		this.releaseCamera();
 	}
 }

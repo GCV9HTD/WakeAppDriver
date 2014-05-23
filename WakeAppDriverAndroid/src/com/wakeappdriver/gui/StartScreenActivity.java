@@ -6,7 +6,6 @@ import org.opencv.android.OpenCVLoader;
 
 
 import com.wakeappdriver.configuration.ConfigurationParameters;
-import com.wakeappdriver.configuration.Enums.StartMode;
 import com.wakeappdriver.framework.services.GoService;
 import com.wakeappdriver.R;
 
@@ -17,15 +16,12 @@ import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 
 public class StartScreenActivity extends Activity {
 	private static final String TAG = "WAD";
-	private StartMode startMode;
-	private Context mContext;
 
 	private AlertDialog mExitMessage;
 
@@ -34,20 +30,16 @@ public class StartScreenActivity extends Activity {
 		@Override
 		public void onManagerConnected(int status) {
 			switch (status) {
+
 			case LoaderCallbackInterface.SUCCESS:
-			{
 				Log.i(TAG, "OpenCV loaded successfully");
-			} break;
+				break;
 			default:
-			{
 				super.onManagerConnected(status);
-			} break;
+				break;
 			}
-		}
+		};
 	};
-	
-	Thread t = null;
-	
 	
 	
 	@Override
@@ -56,9 +48,6 @@ public class StartScreenActivity extends Activity {
 		setContentView(R.layout.activity_start_screen);			
 		OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_3, this, mLoaderCallback);
 		ConfigurationParameters.init(this);
-		mContext = getApplicationContext();
-		startMode = StartMode.SERVICE;
-
 		setExitMessage();
 	}
 
@@ -71,42 +60,27 @@ public class StartScreenActivity extends Activity {
 	@Override
 	public void onBackPressed() {
 		// Display exit message
-		setExitMessage();
 		mExitMessage.show();
 	}
 	
 
 	public void toMonitoring(View view){
-		Log.d(TAG, "entering, start mode: " + startMode.name());
-		Intent intent;
-
-		switch(startMode){
-
-		case DEBUG:
-			intent = new Intent(this, DebugActivity.class);
-			startActivity(intent);
-			break;
-		case SERVICE:
-			// Start monitor activity
-			intent = new Intent(this, MonitorActivity.class);
-			startActivity(intent);
-			// When the monitor stops it creates a new StartScreenActivity, so delete this one.
-			finish();
-			break;
-		default:
-
-		}
-	}
-
-	public void goDebug(View view) {
-		Intent intent = new Intent(this, DebugActivity.class);
+		Log.d(TAG, "toMonitoring start");
+		Intent intent = new Intent(this, MonitorActivity.class);
 		startActivity(intent);
+		finish();
+	}
+	
+	public void toCalibration(View view){
+		Log.d(TAG, "toCalibration start");
+		Intent intent = new Intent(this, CalibrationActivity.class);
+		startActivity(intent);
+		finish();
 	}
 
 
 	public void toSettings(View view){
-		Log.d(TAG, "entering Settings");
-
+		Log.d(TAG, "toSettings start");
 		Intent intent = new Intent(this, SettingsActivity.class);
 		startActivity(intent);
 	}
@@ -114,24 +88,26 @@ public class StartScreenActivity extends Activity {
 
 	private void setExitMessage() {
 		Builder builder = new AlertDialog.Builder(this); 
-		builder.setTitle("Confirm exit");
-		builder.setMessage("Do you want to exit WakeAppDriver?");
-		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+		builder.setTitle(R.string.dialog_exit_app_title);
+		builder.setMessage(R.string.dialog_exit_app_message);
+		builder.setPositiveButton(R.string.dialog_exit_app_pos_button, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				// Do nothing but disappear the dialog box.
 			}
 		});
-		builder.setPositiveButton("Exit", new DialogInterface.OnClickListener() {
+		builder.setNegativeButton(R.string.dialog_exit_app_neg_button, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				// Close GoService if needed
-				Intent intent = new Intent(mContext, GoService.class);
-				mContext.stopService(intent);
+				final Context context = getApplicationContext();
+				Intent intent = new Intent(context, GoService.class);
+				context.stopService(intent);
 				finish();
 			}
 
 		});
+		
 		mExitMessage = builder.create();
 	}
 

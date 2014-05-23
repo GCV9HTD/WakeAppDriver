@@ -17,7 +17,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.view.Menu;
@@ -80,6 +79,7 @@ public class MonitorActivity extends ListenerActivity{
 	 * Stops the monitoring process. 
 	 */
 	public void stopMonitoring(View view) {
+		Log.d(TAG, CLASS_NAME + ": stopMonitoring start");
 		// Stop GoService
 		this.stopService(GoService.class);
 
@@ -249,6 +249,7 @@ public class MonitorActivity extends ListenerActivity{
 	 * When the driver's face & eyes cannot be identified.
 	 */
 	private void onNoIdent() {
+		Log.d(TAG, CLASS_NAME + ": onNoIdent start");
 		// First, stop the GoService
 		this.stopService(GoService.class);
 		
@@ -259,10 +260,9 @@ public class MonitorActivity extends ListenerActivity{
 	private void initNoIdentDialog() {
 		final Context context = getApplicationContext();
 		Builder b = new AlertDialog.Builder(this); 
-		b.setTitle("Notice");
-		b.setMessage("The system could not detect your face and eyes. Please calibrate your device " +
-				"so your face can be seen.");
-		b.setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+		b.setTitle(R.string.dialog_no_ident_title);
+		b.setMessage(R.string.dialog_no_ident_message);
+		b.setNegativeButton(R.string.dialog_no_ident_neg_button, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
 				Intent intent = new Intent(context, StartScreenActivity.class);
@@ -271,7 +271,7 @@ public class MonitorActivity extends ListenerActivity{
 				finish();
 			}
 		});
-		b.setPositiveButton("Calibrate", new DialogInterface.OnClickListener() {
+		b.setPositiveButton(R.string.dialog_no_ident_pos_button, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				Intent intent = new Intent(context, CalibrationActivity.class);
@@ -370,10 +370,10 @@ public class MonitorActivity extends ListenerActivity{
 	
 	private void initStopMonitorDialog() {
 		Builder b = new AlertDialog.Builder(this);
-		b.setTitle("NOTICE");
-		b.setMessage("The application will stop tracking you.");
-		b.setNegativeButton("Cancel", null);
-		b.setPositiveButton("Stop tracking me", new DialogInterface.OnClickListener() {
+		b.setTitle(R.string.dialog_stop_monitoring_title);
+		b.setMessage(R.string.dialog_stop_monitoring_message);
+		b.setNegativeButton(R.string.dialog_stop_monitoring_neg_button, null);
+		b.setPositiveButton(R.string.dialog_stop_monitoring_pos_button, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				stopMonitoring(null);
