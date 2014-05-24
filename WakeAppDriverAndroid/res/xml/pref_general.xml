@@ -63,6 +63,13 @@
             android:persistent="true"
             android:title="@string/pref_data_collector_mode_title"
             android:dependency="switch_data_collector" />
+        
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="switch_image_recorder"
+            android:title="@string/pref_image_recorder_title"
+            android:summary="@string/pref_image_recorder_description" />
+        
     </PreferenceCategory>
     
 </PreferenceScreen>

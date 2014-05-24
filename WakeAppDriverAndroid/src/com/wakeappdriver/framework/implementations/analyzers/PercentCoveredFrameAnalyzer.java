@@ -9,6 +9,7 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 import org.opencv.objdetect.Objdetect;
@@ -16,6 +17,7 @@ import org.opencv.objdetect.Objdetect;
 import android.os.Environment;
 import android.util.Log;
 
+import com.wakeappdriver.configuration.ConfigurationParameters;
 import com.wakeappdriver.configuration.Enums.OperationMode;
 import com.wakeappdriver.framework.EmergencyHandler;
 import com.wakeappdriver.framework.FrameQueue;
@@ -25,9 +27,9 @@ import com.wakeappdriver.framework.dto.CapturedFrame;
 import com.wakeappdriver.framework.interfaces.FrameAnalyzer;
 
 public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
-    
+
 	private static final String TAG = "WAD";
-	
+
 	private Mat mGray;
 	private Mat mRgba;
 
@@ -41,27 +43,27 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 	private Rect eyeOnlyRect_right;
 	private float mRelativeFaceSize = 0.2f;
 	private int mAbsoluteFaceSize = 0;
-	
+
 	private double maxHeight = 0;
 	private double minHeight = 100;
-	
+
 	private EmergencyHandler emergencyHandler = null;
-	
+
 	private String pathToWrite = Environment.getExternalStorageDirectory() + "/WakeAppDriver/";
-	
+
 	public PercentCoveredFrameAnalyzer(FrameQueueManager queueManager,
 			FrameQueue frameQueue, ResultQueue resultQueue) {
 		super(queueManager, frameQueue, resultQueue);
 		Log.d(TAG, Thread.currentThread().getName() + " :: creating Percent-Covered frame analyzer ");
 		this.mGray = new Mat();
 		this.mRgba = new Mat();
-		
+
 		File folder = new File(pathToWrite);
 		if(!folder.exists()) {
 			folder.mkdirs();
 		}
 	}
-	
+
 	public PercentCoveredFrameAnalyzer(CascadeClassifier mFaceDetector, CascadeClassifier mRightEyeDetector) {
 		super(null, null, null);
 		Log.d(TAG, Thread.currentThread().getName() + " :: creating Percent-Covered frame analyzer ");
@@ -78,7 +80,7 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 	public void setmRightEyeDetector(CascadeClassifier mRightEyeDetector) {
 		this.mRightEyeDetector = mRightEyeDetector;
 	}
-	
+
 	public void setEmergencyHandler(EmergencyHandler emergencyHandler){
 		this.emergencyHandler = emergencyHandler;
 	}
@@ -89,23 +91,27 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 		Double result = null;
 		mRgba = capturedFrame.rgba();
 		mGray = capturedFrame.gray();
-		
+
 		if (mAbsoluteFaceSize == 0) {
 			int height = mGray.rows();
 			if (Math.round(height * mRelativeFaceSize) > 0) {
 				mAbsoluteFaceSize = Math.round(height * mRelativeFaceSize);
 			}
 		}
-		
+
 		Rect r = detectFace();
 		if(r == null) {
-//			Highgui.imwrite(pathToWrite + "no_face_detection_" + capturedFrame.getTimestamp() + ".jpg", capturedFrame.rgba());
+			if(ConfigurationParameters.isImageRecorderOn()) {
+				Highgui.imwrite(pathToWrite + "no_face_detection_" + capturedFrame.getTimestamp() + ".jpg", capturedFrame.rgba());
+			}
 			return null;
 		}
-		
+
 		eyeOnlyRect_right = detectEye(r);
 		if(eyeOnlyRect_right == null){
-//			Highgui.imwrite(pathToWrite + "no_eye_detection_" + capturedFrame.getTimestamp() + ".jpg", capturedFrame.rgba());
+			if(ConfigurationParameters.isImageRecorderOn()) {
+				Highgui.imwrite(pathToWrite + "no_eye_detection_" + capturedFrame.getTimestamp() + ".jpg", capturedFrame.rgba());
+			}
 			return null;
 		}
 
@@ -125,32 +131,33 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 
 		//count black pixels in binarized image to get iris size
 		result = getIrisSize(toDisplayGray,toDisplayRBGA, OperationMode.SERVICE_MODE);
-		
+
 		toDisplayGray.release();
 		toDisplayRBGA.release();
+		if(ConfigurationParameters.isImageRecorderOn()) {
+				Highgui.imwrite(pathToWrite + "detected_frame_" + capturedFrame.getTimestamp() + ".jpg", capturedFrame.rgba());
+		}
 
-//		Highgui.imwrite(pathToWrite + "detected_frame_" + capturedFrame.getTimestamp() + ".jpg", capturedFrame.rgba());
-		
 		if(emergencyHandler != null){
 			emergencyHandler.check(result, capturedFrame.getTimestamp());
 		}
-		
+
 		return result;
 	}
 
 	private Rect detectEye(Rect r) {
 		eyearea_right = new Rect(r.x + r.width / 16,
-				(int) (r.y + (r.height / 4.5)),
-				(r.width - 2 * r.width / 16) / 2, (int) (r.height / 3.0));
+				(int) (r.y + (r.height / 5.5)),
+				(r.width - 2 * r.width / 16) / 2, (int) (r.height / 2.5));
 		eyearea_left = new Rect(r.x + r.width / 16
 				+ (r.width - 2 * r.width / 16) / 2,
-				(int) (r.y + (r.height / 4.5)),
-				(r.width - 2 * r.width / 16) / 2, (int) (r.height / 3.0));
+				(int) (r.y + (r.height / 5.5)),
+				(r.width - 2 * r.width / 16) / 2, (int) (r.height / 2.5));
 
 		//detect eyes with classifier
 		return getEyeRect(mRightEyeDetector, eyearea_right);
 	}
-	
+
 	private Rect detectFace() {
 		//detect faces
 		MatOfRect faces = new MatOfRect();
@@ -162,7 +169,7 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 		Rect[] facesArray = faces.toArray();
 		faces.release();
 		Log.d(TAG, Thread.currentThread().getName() + " :: num of faces: " + faces.size());
-		
+
 		//handle face area
 		if(facesArray.length == 0) {
 			return null;
@@ -232,7 +239,7 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 		toDisplayRBGA.release();
 		mZoomWindow.release();
 		mZoomWindow2.release();
-		
+
 		return mRgba;
 	}
 
@@ -257,12 +264,12 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 				}
 			}
 		}
-		
+
 		double height = top - down;
-		
+
 		if (height > maxHeight)
 			maxHeight = height;
-		
+
 		if (height < minHeight && height > 4)	// 4 is a temporary absolute min-limit
 			minHeight = height;
 
@@ -275,7 +282,7 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 		if(mode.equals(OperationMode.VISUAL_MODE)){ // no blink, draw red line
 			Core.line(toDisplayRgba, new Point(midCol,down), new Point(midCol,top), new Scalar(255,0,0));
 		}
-		
+
 		return ratio;
 	}
 
@@ -299,13 +306,13 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 		Mat toDisplayTmp = new Mat(toDisplayGray.rows(),toDisplayGray.cols(),mRgba.type());
 		Imgproc.cvtColor(toDisplayGray, toDisplayTmp, Imgproc.COLOR_GRAY2RGBA);
 		Imgproc.resize(toDisplayTmp, mZoomWindow,mZoomWindow.size());
-//		mZoomWindow.release();
-//		toDisplayTmp.copyTo(mZoomWindow);
+		//		mZoomWindow.release();
+		//		toDisplayTmp.copyTo(mZoomWindow);
 		Imgproc.resize(toDisplayRgba, mZoomWindow2,mZoomWindow2.size());
 
 		toDisplayTmp.release();
 	}
-	
+
 	private Rect getEyeRect(CascadeClassifier clasificator, Rect area){
 		Rect eye_only_rectangle = null;
 		try{
@@ -314,7 +321,7 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 			clasificator.detectMultiScale(mROI, eyes, 1.15, 2,
 					Objdetect.CASCADE_SCALE_IMAGE | Objdetect.CASCADE_FIND_BIGGEST_OBJECT, new Size(10, 10),
 					new Size());
-			
+
 			if(eyes.toArray().length == 0) {
 				return null;
 			}
@@ -331,7 +338,7 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 		}
 		return eye_only_rectangle;
 	}
-	
+
 	private void CreateAuxiliaryMats() {
 		if (mGray.empty())
 			return;
@@ -362,5 +369,5 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 	public void setMinHeight(double minHeight) {
 		this.minHeight = minHeight;
 	}
-	
+
 }

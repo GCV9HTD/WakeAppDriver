@@ -245,4 +245,14 @@ public class ConfigurationParameters {
 		editor.putInt("numOfWindowsBetweenTwoQueries", numOfWindowsBetweenTwoQueries);
 		editor.apply();
 	}
+	
+	
+	public static boolean isImageRecorderOn(){
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+		return sharedPreferences.getBoolean("switch_image_recorder", false);
+	}
+	
+	
+	
+	
 }
