@@ -89,5 +89,6 @@
     <string name="pref_data_collector_title">Data collector</string>
     <string name="pref_image_recorder_title">Image recorder</string>
     <string name="pref_image_recorder_description">Saves your images. Use it only for 3 minutes</string>
+    <string name="pref_enable_alert">Alert on drowsiness</string>
 
 </resources>

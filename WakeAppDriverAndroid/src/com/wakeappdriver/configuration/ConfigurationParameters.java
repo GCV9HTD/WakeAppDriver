@@ -252,6 +252,12 @@ public class ConfigurationParameters {
 		return sharedPreferences.getBoolean("switch_image_recorder", false);
 	}
 	
+	public static boolean isAlertEnable(){
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+		return sharedPreferences.getBoolean("check_box_enable_alert", true);
+	}
+	
+	
 	
 	
 	
