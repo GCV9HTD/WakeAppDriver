@@ -36,6 +36,11 @@ public class Enums {
 	        }
 	    }
 	}
+	
+	public enum Rotation {
+		LANDSCAPE,
+		PORTRAIT
+	}
 	public enum Action {
 		/** Update the drowsiness level */
 		WAD_ACTION_UPDATE_PREDICITON,

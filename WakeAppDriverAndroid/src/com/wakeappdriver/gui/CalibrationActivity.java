@@ -11,17 +11,21 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 import org.opencv.objdetect.Objdetect;
 
 import com.wakeappdriver.R;
 import com.wakeappdriver.configuration.ConfigurationParameters;
 import com.wakeappdriver.configuration.Constants;
+import com.wakeappdriver.configuration.Enums.Rotation;
+
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -30,6 +34,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -56,6 +61,10 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 	private CameraBridgeViewBase   mOpenCvCameraView;
 
 	private Dialog mCalibFailedDialog;
+	
+	private Mat mRgbaF;
+	private Mat mRgbaT;
+	private Rotation rotation;
 
 
 	@Override
@@ -64,7 +73,25 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 		setContentView(R.layout.activity_calibration);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		init();
+		if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+        	rotation = Rotation.PORTRAIT;
+        }
+		else{
+			rotation = Rotation.LANDSCAPE;
+		}
 	}
+	
+	@Override
+    public void onConfigurationChanged(Configuration _newConfig){
+        super.onConfigurationChanged(_newConfig);
+        if(_newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+        	rotation = Rotation.PORTRAIT;
+        }
+        else{
+        	rotation = Rotation.LANDSCAPE;
+        }
+        
+    }
 
 
 	@Override
@@ -228,7 +255,9 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 
 
 	@Override
-	public void onCameraViewStarted(int width, int height) {		
+	public void onCameraViewStarted(int width, int height) {
+		mRgbaF = new Mat(height, width, CvType.CV_8UC4);
+        mRgbaT = new Mat(width, width, CvType.CV_8UC4);
 	}
 
 	@Override
@@ -245,6 +274,12 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 
 		Mat input_frame_rgba = inputFrame.rgba();
 		Mat input_frame_gray = inputFrame.gray();
+		
+		if(this.rotation == Rotation.PORTRAIT){
+			//transpose and flip both Mats according to the screen orientation
+	         rotateMat(input_frame_gray);
+	         rotateMat(input_frame_rgba);
+		}
 
 		if(mStatus == Status.ANALYZE) {
 			Rect face_rect = detectFace(input_frame_gray);
@@ -276,6 +311,13 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 		}
 
 		return input_frame_rgba;
+	}
+	
+	
+	private void rotateMat(Mat mat){
+		Core.transpose(mat, mRgbaT);
+        Imgproc.resize(mRgbaT, mRgbaF, mRgbaF.size(), 0,0, 0);
+        Core.flip(mRgbaF, mat, -1 );
 	}
 
 
