@@ -125,12 +125,12 @@ public class MonitorActivity extends ListenerActivity{
 			this.promptUserForDrowsiness();
 			break;
 		case WAD_ACTION_ALERT:
-			// Alert only if data collector is off
-			if(ConfigurationParameters.getCollectMode()) {
-				Log.d(TAG, "Alertting! Data collector is on, so no message is popped.");
+			// Alert only if data collector is off or if alert is enable
+			if(ConfigurationParameters.isAlertEnable() && !ConfigurationParameters.getCollectMode()) {
+				onAlert();
 			}
 			else {
-				onAlert();
+				Log.d(TAG, "Alert is disable so assume that alert message popped.");
 			}
 			break;
 		case WAD_ACTION_NO_IDEN:

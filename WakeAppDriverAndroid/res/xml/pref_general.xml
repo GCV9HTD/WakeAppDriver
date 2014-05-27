@@ -70,6 +70,11 @@
             android:title="@string/pref_image_recorder_title"
             android:summary="@string/pref_image_recorder_description" />
         
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="check_box_enable_alert"
+            android:title="@string/pref_enable_alert"/>
+        
     </PreferenceCategory>
     
 </PreferenceScreen>
