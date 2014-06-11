@@ -17,6 +17,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.Menu;
 import android.view.View;
 
@@ -48,7 +49,7 @@ public class StartScreenActivity extends Activity {
 		setContentView(R.layout.activity_start_screen);			
 		OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_3, this, mLoaderCallback);
 		ConfigurationParameters.init(this);
-		setExitMessage();
+		initExitMessage();
 	}
 
 	@Override
@@ -86,17 +87,12 @@ public class StartScreenActivity extends Activity {
 	}
 
 
-	private void setExitMessage() {
-		Builder builder = new AlertDialog.Builder(this); 
+	private void initExitMessage() {
+		Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom)); 
 		builder.setTitle(R.string.dialog_exit_app_title);
+		builder.setIcon(R.drawable.ic_logo);
 		builder.setMessage(R.string.dialog_exit_app_message);
 		builder.setPositiveButton(R.string.dialog_exit_app_pos_button, new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				// Do nothing but disappear the dialog box.
-			}
-		});
-		builder.setNegativeButton(R.string.dialog_exit_app_neg_button, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				// Close GoService if needed
@@ -105,6 +101,14 @@ public class StartScreenActivity extends Activity {
 				context.stopService(intent);
 				finish();
 			}
+			
+		});
+		builder.setNegativeButton(R.string.dialog_exit_app_neg_button, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				// Do nothing but disappear the dialog box.
+			}
+			
 
 		});
 		

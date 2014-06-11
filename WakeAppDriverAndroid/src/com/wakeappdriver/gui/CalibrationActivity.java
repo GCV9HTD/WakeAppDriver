@@ -36,6 +36,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.Menu;
 import android.view.View;
 import android.view.WindowManager;
@@ -50,7 +51,7 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 
 	private int mAbsoluteFaceSize = 0;
 
-	private static enum Status {ANALYZE, WAIT};
+	private static enum Status {ANALYZE, WAIT, SUCCESS, FAIL};
 	private Status mStatus;
 
 	/** Number of frames which the drive's face can be detected in */
@@ -61,7 +62,7 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 	private CameraBridgeViewBase   mOpenCvCameraView;
 
 	private Dialog mCalibFailedDialog;
-	
+
 	private Mat mRgbaF;
 	private Mat mRgbaT;
 	private Rotation rotation;
@@ -74,24 +75,24 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		init();
 		if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
-        	rotation = Rotation.PORTRAIT;
-        }
+			rotation = Rotation.PORTRAIT;
+		}
 		else{
 			rotation = Rotation.LANDSCAPE;
 		}
 	}
-	
+
 	@Override
-    public void onConfigurationChanged(Configuration _newConfig){
-        super.onConfigurationChanged(_newConfig);
-        if(_newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
-        	rotation = Rotation.PORTRAIT;
-        }
-        else{
-        	rotation = Rotation.LANDSCAPE;
-        }
-        
-    }
+	public void onConfigurationChanged(Configuration _newConfig){
+		super.onConfigurationChanged(_newConfig);
+		if(_newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+			rotation = Rotation.PORTRAIT;
+		}
+		else{
+			rotation = Rotation.LANDSCAPE;
+		}
+
+	}
 
 
 	@Override
@@ -130,13 +131,9 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 	}
 
 
-
-	/**
-	 * NOTICE: You must call onStop() before invoking this method 
-	 * @param view
-	 */
 	public void toMonitoring(View view) {
-		Log.i(TAG, CLASS_NAME + ": going to monitoring screen");
+		Log.i(TAG, CLASS_NAME + ": Moving to monitoring activity");
+		this.onStop();
 		Intent intent = new Intent(this, MonitorActivity.class);
 		startActivity(intent);
 		finish();
@@ -146,11 +143,13 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 	 * Stop this activity and start StartScreenActivity
 	 */
 	public void toStartScreen(View view) {
+		Log.i(TAG, CLASS_NAME + ": Moving to startScreen activity");
 		// Stop camera task and analyzer
 		this.onStop();
 
 		Intent intent = new Intent(this, StartScreenActivity.class);
 		this.startActivity(intent);
+		finish();
 	}
 
 
@@ -246,18 +245,21 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 
 	@Override
 	public void onStop() {
+		Log.i(TAG, CLASS_NAME + " onStop() started.");
 		super.onStop();
+		
 		if (mOpenCvCameraView != null)
 			mOpenCvCameraView.disableView();
 
 		finish();
+		Log.i(TAG, CLASS_NAME + " onStop() finished.");
 	}
 
 
 	@Override
 	public void onCameraViewStarted(int width, int height) {
 		mRgbaF = new Mat(height, width, CvType.CV_8UC4);
-        mRgbaT = new Mat(width, width, CvType.CV_8UC4);
+		mRgbaT = new Mat(width, width, CvType.CV_8UC4);
 	}
 
 	@Override
@@ -269,16 +271,17 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 		/* 1. Check the process' status at each frame
 		 * 2. Mark detected faces with a rectangle - user feedback. */
 		checkCalibrationStatus();
+
 		if(mStatus == Status.ANALYZE)
 			Log.d(TAG, CLASS_NAME + ": #Asa ident frames: " + mIdent_frames   + "   no ident frames: " + mNo_ident_frames);
 
 		Mat input_frame_rgba = inputFrame.rgba();
 		Mat input_frame_gray = inputFrame.gray();
-		
+
 		if(this.rotation == Rotation.PORTRAIT){
 			//transpose and flip both Mats according to the screen orientation
-	         rotateMat(input_frame_gray);
-	         rotateMat(input_frame_rgba);
+			rotateMat(input_frame_gray);
+			rotateMat(input_frame_rgba);
 		}
 
 		if(mStatus == Status.ANALYZE) {
@@ -312,12 +315,12 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 
 		return input_frame_rgba;
 	}
-	
-	
+
+
 	private void rotateMat(Mat mat){
 		Core.transpose(mat, mRgbaT);
-        Imgproc.resize(mRgbaT, mRgbaF, mRgbaF.size(), 0,0, 0);
-        Core.flip(mRgbaF, mat, -1 );
+		Imgproc.resize(mRgbaT, mRgbaF, mRgbaF.size(), 0,0, 0);
+		Core.flip(mRgbaF, mat, -1 );
 	}
 
 
@@ -331,7 +334,6 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 	private void checkCalibrationStatus() {
 		if(this.mIdent_frames >= Constants.MIN_CALIB_FRAMES) {
 			onCalibrationSuccess();
-			return;
 		}
 		if(this.mNo_ident_frames >= Constants.MIN_NO_IDENT_CALIB_FRAMES) {
 			onCalibrationFail();
@@ -350,16 +352,23 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 		final View button_start = findViewById(R.id.ButtonStart);
 		button_start.post(new Runnable() {
 			public void run() {
-				button_start.setVisibility(View.VISIBLE);
-				button_start.bringToFront();
+				//button_start.setVisibility(View.VISIBLE);
+				//button_start.bringToFront();
+				
+				/* #Asa
+				 * I dont know why, but calling toMonitoring() from the "main" scope
+				 * of this method didnt work (the app got stuck).
+				 * This call is basically a patch and should be refactored.
+				 */
+				toMonitoring(null);
 			}
 		});
-		final View button_stop = findViewById(R.id.ButtonStop);
-		button_stop.post(new Runnable() {
-			public void run() {
-				button_stop.setVisibility(View.INVISIBLE);
-			}
-		});
+//		final View button_stop = findViewById(R.id.ButtonStop);
+//		button_stop.post(new Runnable() {
+//			public void run() {
+//				button_stop.setVisibility(View.INVISIBLE);
+//			}
+//		});
 	}
 
 
@@ -465,10 +474,15 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 
 
 	private void initCalibFailedDialog() {
-		Builder b = new AlertDialog.Builder(this);
+		Builder b = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
 		b.setTitle(R.string.dialog_calibration_failed_title);
 		b.setMessage(R.string.dialog_calibration_failed_message);
-		b.setNegativeButton(R.string.dialog_calibration_failed_neg_button, null);
+		b.setNegativeButton(R.string.dialog_calibration_failed_neg_button, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				toStartScreen(null);
+			}
+		});
 		b.setPositiveButton(R.string.dialog_calibration_failed_pos_button, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {

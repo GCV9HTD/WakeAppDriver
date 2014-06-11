@@ -1,5 +1,7 @@
 package com.wakeappdriver.configuration;
 
+import org.opencv.core.Core.MinMaxLocResult;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -61,6 +63,9 @@ public class ConfigurationParameters {
 		double pref_threshold = 1 - (pref_sensitivity / MAX_THRESHOLD);
 		// [0..1] to [0..0.2]
 		double normaled_threshold = pref_threshold * 0.2;
+		if(normaled_threshold < Constants.MIN_PERCLOS_THRESHOLD)
+			normaled_threshold = Constants.MIN_PERCLOS_THRESHOLD;
+		
 		return normaled_threshold;
 	}
 

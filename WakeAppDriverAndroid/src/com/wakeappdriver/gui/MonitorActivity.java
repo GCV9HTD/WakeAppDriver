@@ -19,6 +19,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.speech.RecognizerIntent;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.Menu;
 import android.view.View;
 import android.view.Window;
@@ -259,8 +260,9 @@ public class MonitorActivity extends ListenerActivity{
 
 	private void initNoIdentDialog() {
 		final Context context = getApplicationContext();
-		Builder b = new AlertDialog.Builder(this); 
+		Builder b = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom)); 
 		b.setTitle(R.string.dialog_no_ident_title);
+		b.setIcon(R.drawable.ic_calibration);
 		b.setMessage(R.string.dialog_no_ident_message);
 		b.setNegativeButton(R.string.dialog_no_ident_neg_button, new DialogInterface.OnClickListener() {
 			@Override
@@ -330,6 +332,10 @@ public class MonitorActivity extends ListenerActivity{
 	}
 
 
+	/**
+	 * Updates the GUI drowsiness level.
+	 * @param prediction a number between [0..1] where 0 is wake and 1 is drowsy.  
+	 */
 	private void onUpdatePrediction(double prediction) {
 		if(prediction < 0){
 			return;
@@ -345,7 +351,9 @@ public class MonitorActivity extends ListenerActivity{
 		drowsiness_percent = drowsiness_percent > 100 ? 100 : drowsiness_percent;
 		progressValueTextView.setText(drowsiness_percent + "%");
 		
-		System.out.println("#Asa prediction = " + prediction + "   set value to " + (prediction * 100 / max_bar_value) + "%");
+		Log.i(TAG, "#Asa MonitorActivity prediction = " + prediction + "   max_bar_val = " + max_bar_value +
+				"   percent = " + drowsiness_percent);
+		
 	}
 	
 	
@@ -369,8 +377,9 @@ public class MonitorActivity extends ListenerActivity{
 
 	
 	private void initStopMonitorDialog() {
-		Builder b = new AlertDialog.Builder(this);
+		Builder b = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
 		b.setTitle(R.string.dialog_stop_monitoring_title);
+		b.setIcon(R.drawable.ic_warning_holo_light);
 		b.setMessage(R.string.dialog_stop_monitoring_message);
 		b.setNegativeButton(R.string.dialog_stop_monitoring_neg_button, null);
 		b.setPositiveButton(R.string.dialog_stop_monitoring_pos_button, new DialogInterface.OnClickListener() {
@@ -388,8 +397,11 @@ public class MonitorActivity extends ListenerActivity{
 	private void setLeyout() {
 		// Decide which activity layout to show, according to "display bar" setting
 		boolean displayBar = ConfigurationParameters.toDisplayBar();
-		if(displayBar)
+		if(displayBar) {
 			setContentView(R.layout.activity_monitor_with_bar);
+			double rand_drowsiness = Math.random() * 0.01;
+			onUpdatePrediction(rand_drowsiness);
+		}
 		else
 			setContentView(R.layout.activity_monitor);
 	}
