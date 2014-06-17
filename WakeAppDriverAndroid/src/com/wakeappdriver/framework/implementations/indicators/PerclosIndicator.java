@@ -12,6 +12,8 @@ import com.wakeappdriver.framework.interfaces.Indicator;
 public class PerclosIndicator implements Indicator{
     private static final String TAG = "WAD";
 
+    public static final double PERCLOS_THRESHOLD = 0.2;
+    
 	private Double value;
 	private int minSamples;
 	
@@ -31,7 +33,7 @@ public class PerclosIndicator implements Indicator{
 		for (FrameAnalyzerResult result : results) {
 			if (result.getValue() != null && !result.getValue().isInfinite() && !result.getValue().isNaN()) {
 				countValidFrames++;
-				if (result.getValue() <= 0.2) {
+				if (result.getValue() <= PERCLOS_THRESHOLD) {
 					countClosedFrames++;
 				}
 			}

@@ -45,7 +45,7 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 	private int mAbsoluteFaceSize = 0;
 
 	private double maxHeight = 0;
-	private double minHeight = 100;
+	private double minHeight = 5;	// temporary - set minHeight to fixed size
 
 	private EmergencyHandler emergencyHandler = null;
 
@@ -270,8 +270,9 @@ public class PercentCoveredFrameAnalyzer extends FrameAnalyzer {
 		if (height > maxHeight)
 			maxHeight = height;
 
-		if (height < minHeight && height > 4)	// 4 is a temporary absolute min-limit
-			minHeight = height;
+		//disabled population of minHeight due to use of fixed minHeight value
+//		if (height < minHeight && height > 4)	// 4 is a temporary absolute min-limit
+//			minHeight = height;
 
 		double ratio = (height-minHeight) / (maxHeight-minHeight);
 		Log.d(TAG, Thread.currentThread().getName() + " :: Height = " + height);
