@@ -17,4 +17,6 @@ public class Constants {
 	public static final int DEFAULT_WINDOW_SIZE = 15;
 	/** Minimum threshold for PERCLOS detection */
 	public static final double MIN_PERCLOS_THRESHOLD = 0.05;
+	/** global alert cooldown **/
+	public static final long GLOBAL_ALERT_COOLDOWN = 10000;
 }
