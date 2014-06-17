@@ -50,13 +50,13 @@ public class EmergencyHandler {
 
 		if(closedDuration > closedAlertLimit){
 			
-			if(timestamp - lastAlert > emergencyCoolDown ){
+//			if(timestamp - lastAlert > emergencyCoolDown ){
 				this.detector.emergency();
 				this.lastAlert = timestamp;
 				Log.e(TAG, "emergency!, duration: " + closedDuration);
-			} else {
-				Log.e(TAG, "would have alerted, duration: " + closedDuration);
-			}
+//			} else {
+//				Log.e(TAG, "would have alerted, duration: " + closedDuration);
+//			}
 		}
 	}
 }

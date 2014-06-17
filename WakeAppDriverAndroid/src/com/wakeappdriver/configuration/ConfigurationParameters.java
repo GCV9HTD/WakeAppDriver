@@ -127,7 +127,7 @@ public class ConfigurationParameters {
 	}
 
 	public static int getDurationBetweenAlerts() {
-		return sharedPref.getInt("durationBetweenAlerts", 3);
+		return sharedPref.getInt("durationBetweenAlerts", 0);
 	}
 
 	public static void setDurationBetweenAlerts(int durationBetweenAlerts) {

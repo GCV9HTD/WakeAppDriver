@@ -84,14 +84,13 @@ public class MonitorActivity extends ListenerActivity{
 					double max_bar_value = ConfigurationParameters.getAlertThreshold() * 1.5;
 					@Override
 					public void run() {
-
 						// Update drowsiness bar:
 						//progressBar.setCurrentValue((int) (mOldPrediction * 10000 / max_bar_value));
-						progressBar.setCurrentValue((int) (mCurrentPrediction * 10000));
-						int drowsiness_percent = (int) (mCurrentPrediction * 100);
+						int drowsinessPercent = (int) (mCurrentPrediction * 100);
+						progressBar.setCurrentValue(drowsinessPercent*100);
 						// Drowsiness percent shell not be over 100, so make it 100 if it's above.
-						drowsiness_percent = drowsiness_percent > 100 ? 100 : drowsiness_percent;
-						progressValueTextView.setText(drowsiness_percent + "%");
+						drowsinessPercent = drowsinessPercent > 100 ? 100 : drowsinessPercent;
+						progressValueTextView.setText(drowsinessPercent + "%");
 						
 						if((int)(mCurrentPrediction*100) < (int)(mNewPrediction*100))
 							mCurrentPrediction += 0.01;
@@ -202,7 +201,7 @@ public class MonitorActivity extends ListenerActivity{
 	 */
 	public void onAlert() {
 		long timestamp = System.currentTimeMillis();
-		if(timestamp - lastAlert  > Constants.GLOBAL_ALERT_COOLDOWN && lastAlert != 0){
+		if(timestamp - lastAlert  < Constants.GLOBAL_ALERT_COOLDOWN && lastAlert != 0){
 			Log.d(TAG, CLASS_NAME + ": Alert canceled, still in cooldown");	
 			this.lastAlert = timestamp;
 			return;
@@ -401,10 +400,12 @@ public class MonitorActivity extends ListenerActivity{
 		if(prediction == null) {
 			return;
 		}
-		if(prediction < 0){
-			prediction = 0.0;
-		}
+//		if(prediction < 0){
+//			prediction = 0.0;
+//		}
 		mNewPrediction = prediction;
+		Log.i(TAG, Thread.currentThread().getName() + " :: " + "monitor prediction: " + mNewPrediction);
+
 	}
 	
 	
