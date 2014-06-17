@@ -32,6 +32,10 @@ public class MonitorActivity extends ListenerActivity{
 	private static final String CLASS_NAME = "MonitorActivity";
 	private static final int REQUEST_CODE = 1234;
 
+	
+	/** timestamp of last alert**/
+	private long lastAlert = 0;
+	
 	/** Dialog box for alert */
 	private Dialog mAlertDialog;
 	private MediaPlayer mPlayer;
@@ -148,6 +152,14 @@ public class MonitorActivity extends ListenerActivity{
 	 * Starts alerting.
 	 */
 	public void onAlert() {
+		long timestamp = System.currentTimeMillis();
+		if(timestamp - lastAlert  > Constants.GLOBAL_ALERT_COOLDOWN && lastAlert != 0){
+			Log.d(TAG, CLASS_NAME + ": Alert canceled, still in cooldown");	
+			this.lastAlert = timestamp;
+			return;
+		}
+		this.lastAlert = timestamp;
+		
 		Log.d(TAG, CLASS_NAME + ": starting alert");
 		mAlertDialog.show();
 		mPlayer.start();
