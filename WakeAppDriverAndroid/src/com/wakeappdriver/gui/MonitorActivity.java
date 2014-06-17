@@ -86,7 +86,6 @@ public class MonitorActivity extends ListenerActivity{
 					public void run() {
 
 						// Update drowsiness bar:
-						//progressBar.setCurrentValue((int) (mOldPrediction * 10000 / max_bar_value));
 						progressBar.setCurrentValue((int) (mCurrentPrediction * 10000));
 						int drowsiness_percent = (int) (mCurrentPrediction * 100);
 						// Drowsiness percent shell not be over 100, so make it 100 if it's above.
@@ -470,9 +469,8 @@ public class MonitorActivity extends ListenerActivity{
 		// Backup the device's audio settings:
 		mOriginalAudioStreamVolume = am.getStreamVolume(Constants.ALERT_STREAM);
 		// Set volume according to settings (preferences):
-		int max_stream_volume = am.getStreamMaxVolume(Constants.ALERT_STREAM);
 		float pref_volume = ConfigurationParameters.getVolume(getApplicationContext());
-		am.setStreamVolume(Constants.ALERT_STREAM, (int) (max_stream_volume * 1000 / pref_volume), 0);
+		am.setStreamVolume(Constants.ALERT_STREAM, (int) pref_volume, 0);
 		
 		mPlayer.setLooping(true);
 	}
