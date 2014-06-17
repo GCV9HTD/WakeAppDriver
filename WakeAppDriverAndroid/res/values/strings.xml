@@ -32,7 +32,7 @@
     <string name="dialog_exit_app_message">Do you want to exit WakeAppDriver?</string>
     <string name="dialog_exit_app_neg_button">Cancel</string>
     <string name="dialog_exit_app_pos_button">Exit</string>
-    <string name="dialog_calibration_failed_title">Sorry\.\.\.</string>
+    <string name="dialog_calibration_failed_title">No detection</string>
     <string name="dialog_calibration_failed_message">Your face cannot be detected. Please try again.</string>
     <string name="dialog_calibration_failed_neg_button">Exit</string>
     <string name="dialog_calibration_failed_pos_button">Retry</string>

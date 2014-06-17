@@ -46,6 +46,9 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 	private static final String TAG = "WAD";
 	private final String CLASS_NAME = "CalibrationActivity";
 
+	private final int FRAME_CHUNK = 3;
+	private int ident_eye = 0;
+
 	private CascadeClassifier mFaceDetector;
 	private CascadeClassifier mRightEyeDetector;
 
@@ -247,7 +250,7 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 	public void onStop() {
 		Log.i(TAG, CLASS_NAME + " onStop() started.");
 		super.onStop();
-		
+
 		if (mOpenCvCameraView != null)
 			mOpenCvCameraView.disableView();
 
@@ -293,20 +296,21 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 				Rect[] eyes = detectEyes(input_frame_gray, face_rect);
 				if(eyes[0] != null)
 					Core.rectangle(input_frame_rgba, eyes[0].tl(), eyes[0].br(), new Scalar(0, 0, 255, 255), 2);
-				if(eyes[1] != null)
-					Core.rectangle(input_frame_rgba, eyes[1].tl(), eyes[1].br(), new Scalar(0, 0, 255, 255), 2);
 
 				// Count identified frames (face & right eye)
 				if(eyes[0] != null) {
 					mIdent_frames++;
 					mNo_ident_frames--;
+					ident_eye = ident_eye < FRAME_CHUNK ? ident_eye+1 : FRAME_CHUNK;
 				}
 			}
 			else {
 				// No identified faces
 				mIdent_frames--;
 				mNo_ident_frames++;
+				ident_eye = ident_eye > 0 ? ident_eye-1 : 0;
 			}
+			updateUserFeedback();
 		}
 		// Else - status is WAIT (means don't analyze frames)
 		else {
@@ -316,6 +320,39 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 		return input_frame_rgba;
 	}
 
+
+	private void updateUserFeedback() {
+		final View green_light = findViewById(R.id.CalibrationGreenLight);
+		final View red_light = findViewById(R.id.CalibrationRedLight);
+		// Identify
+		if(mIdent_frames >= FRAME_CHUNK) {
+			green_light.post(new Runnable() {
+				public void run() {
+					green_light.setVisibility(View.VISIBLE);
+				}
+			});
+			red_light.post(new Runnable() {
+				public void run() {
+					red_light.setVisibility(View.INVISIBLE);
+
+				}
+			});
+		}
+		else {
+			green_light.post(new Runnable() {
+				public void run() {
+					green_light.setVisibility(View.INVISIBLE);
+
+				}
+			});
+			red_light.post(new Runnable() {
+				public void run() {
+					red_light.setVisibility(View.VISIBLE);
+
+				}
+			});
+		}
+	}
 
 	private void rotateMat(Mat mat){
 		Core.transpose(mat, mRgbaT);
@@ -354,7 +391,7 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 			public void run() {
 				//button_start.setVisibility(View.VISIBLE);
 				//button_start.bringToFront();
-				
+
 				/* #Asa
 				 * I dont know why, but calling toMonitoring() from the "main" scope
 				 * of this method didnt work (the app got stuck).
@@ -363,12 +400,12 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 				toMonitoring(null);
 			}
 		});
-//		final View button_stop = findViewById(R.id.ButtonStop);
-//		button_stop.post(new Runnable() {
-//			public void run() {
-//				button_stop.setVisibility(View.INVISIBLE);
-//			}
-//		});
+		//		final View button_stop = findViewById(R.id.ButtonStop);
+		//		button_stop.post(new Runnable() {
+		//			public void run() {
+		//				button_stop.setVisibility(View.INVISIBLE);
+		//			}
+		//		});
 	}
 
 
@@ -409,16 +446,16 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 		Rect eyearea_right = new Rect(face_rect.x + face_rect.width / 16,
 				(int) (face_rect.y + (face_rect.height / 4.5)),
 				(face_rect.width - 2 * face_rect.width / 16) / 2, (int) (face_rect.height / 3.0));
-		Rect eyearea_left = new Rect(face_rect.x + face_rect.width / 16
-				+ (face_rect.width - 2 * face_rect.width / 16) / 2,
-				(int) (face_rect.y + (face_rect.height / 4.5)),
-				(face_rect.width - 2 * face_rect.width / 16) / 2, (int) (face_rect.height / 3.0));
+//		Rect eyearea_left = new Rect(face_rect.x + face_rect.width / 16
+//				+ (face_rect.width - 2 * face_rect.width / 16) / 2,
+//				(int) (face_rect.y + (face_rect.height / 4.5)),
+//				(face_rect.width - 2 * face_rect.width / 16) / 2, (int) (face_rect.height / 3.0));
 
 		Rect[] eyes = new Rect[2];
 
 		//detect eyes with classifier
 		eyes[0] = getEyeRect(frame_gray, mRightEyeDetector, eyearea_right);
-		eyes[1] = getEyeRect(frame_gray, mRightEyeDetector, eyearea_left);
+//		eyes[1] = getEyeRect(frame_gray, mRightEyeDetector, eyearea_left);
 		return eyes;
 	}
 
@@ -476,6 +513,7 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 	private void initCalibFailedDialog() {
 		Builder b = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
 		b.setTitle(R.string.dialog_calibration_failed_title);
+		b.setIcon(R.drawable.ic_calibration);
 		b.setMessage(R.string.dialog_calibration_failed_message);
 		b.setNegativeButton(R.string.dialog_calibration_failed_neg_button, new DialogInterface.OnClickListener() {
 			@Override

@@ -21,7 +21,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/drowsiness_level_name"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_marginBottom="10dp"/>
 
     <ImageButton
         android:id="@+id/ButtonStop"
@@ -29,7 +30,7 @@
         android:layout_height="wrap_content"
         android:contentDescription="@string/button_stop_monitoring"
         android:onClick="stopMonitoring"
-        android:src="@drawable/ic_action_stop"
+        android:src="@drawable/button_stop"
         android:background="@drawable/rounded_rectangle"/>
 
 </LinearLayout>

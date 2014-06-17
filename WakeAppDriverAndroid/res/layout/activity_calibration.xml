@@ -11,7 +11,7 @@
         android:layout_height="fill_parent"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="50dp">
+        android:layout_marginBottom="40dp">
 
         <ImageButton
             android:id="@+id/ButtonStart"
@@ -31,7 +31,7 @@
             android:layout_height="match_parent"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
-            android:layout_marginBottom="32dp" />
+            android:layout_marginBottom="24dp" />
 
     </RelativeLayout>
 
@@ -51,8 +51,29 @@
             android:layout_centerVertical="true"
             android:layout_centerInParent="true"
             android:onClick="toStartScreen"
-            android:src="@drawable/ic_action_stop"
+            android:src="@drawable/button_stop"
             android:background="@drawable/rounded_rectangle"/>
+
+        <ImageView
+            android:id="@+id/CalibrationGreenLight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="15dp"
+            android:visibility="invisible"
+            android:src="@drawable/calibration_green_light" />
+        
+        <ImageView
+            android:id="@+id/CalibrationRedLight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="15dp"
+            android:visibility="visible"
+            android:src="@drawable/calibration_red_light" />
+
     </RelativeLayout>
 
 </RelativeLayout>
