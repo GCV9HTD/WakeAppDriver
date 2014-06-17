@@ -29,6 +29,7 @@
         <activity
             android:name="com.wakeappdriver.gui.StartScreenActivity"
             android:label="@string/app_name"
+            android:screenOrientation="landscape"
             android:configChanges="keyboardHidden|orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -40,6 +41,7 @@
             android:name="com.wakeappdriver.gui.SettingsActivity"
             android:label="@string/title_activity_settings"
             android:icon="@drawable/ic_bar_settings"
+            android:screenOrientation="landscape"
             android:parentActivityName="com.wakeappdriver.gui.StartScreenActivity"
             android:theme="@android:style/Theme.Holo">
             <meta-data
@@ -60,6 +62,7 @@
             android:name="com.wakeappdriver.gui.MonitorActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_monitor"
+            android:screenOrientation="landscape"
             android:parentActivityName="com.wakeappdriver.gui.StartScreenActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -76,6 +79,7 @@
         </activity>
         <activity
             android:name="com.wakeappdriver.gui.HelpActivity"
+            android:screenOrientation="landscape"
             android:label="@string/title_activity_help" >
         </activity>
 
@@ -85,6 +89,7 @@
         <activity
             android:name="com.wakeappdriver.gui.CalibrationActivity"
             android:label="@string/title_activity_calibration"
+            android:screenOrientation="landscape"
             android:configChanges="keyboardHidden|orientation|screenSize">
         </activity>
     </application>

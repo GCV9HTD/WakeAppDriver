@@ -66,9 +66,9 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 
 	private Dialog mCalibFailedDialog;
 
-	private Mat mRgbaF;
-	private Mat mRgbaT;
-	private Rotation rotation;
+	//private Mat mRgbaF;
+	//private Mat mRgbaT;
+	//private Rotation rotation;
 
 
 	@Override
@@ -77,23 +77,23 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 		setContentView(R.layout.activity_calibration);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		init();
-		if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+		/*if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
 			rotation = Rotation.PORTRAIT;
 		}
 		else{
 			rotation = Rotation.LANDSCAPE;
-		}
+		}*/
 	}
 
 	@Override
 	public void onConfigurationChanged(Configuration _newConfig){
 		super.onConfigurationChanged(_newConfig);
-		if(_newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+		/*if(_newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
 			rotation = Rotation.PORTRAIT;
 		}
 		else{
 			rotation = Rotation.LANDSCAPE;
-		}
+		}*/
 
 	}
 
@@ -261,8 +261,8 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 
 	@Override
 	public void onCameraViewStarted(int width, int height) {
-		mRgbaF = new Mat(height, width, CvType.CV_8UC4);
-		mRgbaT = new Mat(width, width, CvType.CV_8UC4);
+		//mRgbaF = new Mat(height, width, CvType.CV_8UC4);
+		//mRgbaT = new Mat(width, width, CvType.CV_8UC4);
 	}
 
 	@Override
@@ -281,11 +281,11 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 		Mat input_frame_rgba = inputFrame.rgba();
 		Mat input_frame_gray = inputFrame.gray();
 
-		if(this.rotation == Rotation.PORTRAIT){
+		/*if(this.rotation == Rotation.PORTRAIT){
 			//transpose and flip both Mats according to the screen orientation
 			rotateMat(input_frame_gray);
 			rotateMat(input_frame_rgba);
-		}
+		}*/
 
 		if(mStatus == Status.ANALYZE) {
 			Rect face_rect = detectFace(input_frame_gray);
@@ -354,11 +354,11 @@ public class CalibrationActivity extends Activity implements CvCameraViewListene
 		}
 	}
 
-	private void rotateMat(Mat mat){
+	/*private void rotateMat(Mat mat){
 		Core.transpose(mat, mRgbaT);
 		Imgproc.resize(mRgbaT, mRgbaF, mRgbaF.size(), 0,0, 0);
 		Core.flip(mRgbaF, mat, -1 );
-	}
+	}*/
 
 
 
