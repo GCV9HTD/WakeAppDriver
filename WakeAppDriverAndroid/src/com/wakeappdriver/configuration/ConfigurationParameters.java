@@ -98,7 +98,7 @@ public class ConfigurationParameters {
 
 	public static float getVolume(Context context) {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-		int pref_volume = sharedPreferences.getInt("volume", 1000);
+		int pref_volume = sharedPreferences.getInt("volume", 15);
 		return pref_volume;
 	}
 
