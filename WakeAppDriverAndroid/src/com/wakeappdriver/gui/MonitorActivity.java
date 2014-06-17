@@ -1,12 +1,16 @@
 package com.wakeappdriver.gui;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import com.wakeappdriver.R;
 import com.wakeappdriver.configuration.ConfigurationParameters;
 import com.wakeappdriver.configuration.Constants;
 import com.wakeappdriver.configuration.Enums.Action;
 import com.wakeappdriver.framework.services.GoService;
 
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -35,11 +39,16 @@ public class MonitorActivity extends ListenerActivity{
 	/** Dialog box for alert */
 	private Dialog mAlertDialog;
 	private MediaPlayer mPlayer;
+	private int mOriginalAudioStreamVolume;
 
 	/** Dialog box for no-identify message */ 
 	private Dialog mNoIdenDialog;
 	/** Dialog box for warning that the monitor will stop if OK is pressed */
 	private Dialog mStopMonitorDialog;
+	
+	private double mOldPrediction;
+	private double mNewPrediction;
+	Timer barTimer = new Timer();
 	
 	private String drowsinessPromptMethod;
 
@@ -47,14 +56,46 @@ public class MonitorActivity extends ListenerActivity{
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
+		mOldPrediction = 0;
+		mNewPrediction = 0;
 		setLeyout();
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		startGoService();
 		initAlertDialog();
-		initAudiofile();
+		initAudio();
 		initNoIdentDialog();
 		initStopMonitorDialog();
+		
+		final Handler barHandler = new Handler();
+
+		barTimer.scheduleAtFixedRate(new TimerTask(){
+
+			@Override
+			public void run() {
+				barHandler.post(new Runnable() {
+					VerticalProgressBar progressBar = (VerticalProgressBar) findViewById(R.id.acd_id_progress_bar);
+					TextView progressValueTextView = (TextView) findViewById(R.id.acd_id_progress_value);
+					// Set maximal value of the bar as 150% of the current alert threshold.
+					double max_bar_value = ConfigurationParameters.getAlertThreshold() * 1.5;
+					@Override
+					public void run() {
+
+						// Update drowsiness bar:
+						progressBar.setCurrentValue((int) (mOldPrediction * 10000 / max_bar_value));
+						int drowsiness_percent = (int) (mOldPrediction * 100 / max_bar_value);
+						// Drowsiness percent shell not be over 100, so make it 100 if it's above.
+						drowsiness_percent = drowsiness_percent > 100 ? 100 : drowsiness_percent;
+						progressValueTextView.setText(drowsiness_percent + "%");
+						
+						if((int)(mOldPrediction*100) < (int)(mNewPrediction*100))
+							mOldPrediction += 0.01;
+						else if((int)(mOldPrediction*100) > (int)(mNewPrediction*100))
+							mOldPrediction -= 0.01;
+					}
+				});
+			}
+		}, Constants.BAR_UPDATE_INTERVAL, Constants.BAR_UPDATE_INTERVAL);
 		
 		this.drowsinessPromptMethod = ConfigurationParameters.getDrowsinessPromptMethod();
 		
@@ -88,6 +129,13 @@ public class MonitorActivity extends ListenerActivity{
 			mPlayer.stop();
 		}
 		mPlayer.release();
+		// Restore device's audio settings:
+		final AudioManager am = (AudioManager) getSystemService(AUDIO_SERVICE);
+		am.setStreamVolume(Constants.ALERT_STREAM, mOriginalAudioStreamVolume, 0);
+		
+		// Stop bar update
+		barTimer.cancel();
+		
 		// Go to startScreen activity
 		Intent intent = new Intent(this, StartScreenActivity.class);
 		startActivity(intent);
@@ -340,20 +388,22 @@ public class MonitorActivity extends ListenerActivity{
 		if(prediction < 0){
 			return;
 		}
-		// Update drowsiness bar:
-		VerticalProgressBar progressBar = (VerticalProgressBar) findViewById(R.id.acd_id_progress_bar);
-		TextView progressValueTextView = (TextView) findViewById(R.id.acd_id_progress_value);
-		// Set maximal value of the bar as 150% of the current alert threshold.
-		double max_bar_value = ConfigurationParameters.getAlertThreshold() * 1.5;
-		progressBar.setCurrentValue((int) (prediction * 10000 / max_bar_value));
-		int drowsiness_percent = (int) (prediction * 100 / max_bar_value);
-		// Drowsiness percent shell not be over 100, so make it 100 if it's above.
-		drowsiness_percent = drowsiness_percent > 100 ? 100 : drowsiness_percent;
-		progressValueTextView.setText(drowsiness_percent + "%");
-		
-		Log.i(TAG, "#Asa MonitorActivity prediction = " + prediction + "   max_bar_val = " + max_bar_value +
-				"   percent = " + drowsiness_percent);
-		
+		mOldPrediction = mNewPrediction;
+		mNewPrediction = prediction;
+//		// Update drowsiness bar:
+//		VerticalProgressBar progressBar = (VerticalProgressBar) findViewById(R.id.acd_id_progress_bar);
+//		TextView progressValueTextView = (TextView) findViewById(R.id.acd_id_progress_value);
+//		// Set maximal value of the bar as 150% of the current alert threshold.
+//		double max_bar_value = ConfigurationParameters.getAlertThreshold() * 1.5;
+//		progressBar.setCurrentValue((int) (prediction * 10000 / max_bar_value));
+//		int drowsiness_percent = (int) (prediction * 100 / max_bar_value);
+//		// Drowsiness percent shell not be over 100, so make it 100 if it's above.
+//		drowsiness_percent = drowsiness_percent > 100 ? 100 : drowsiness_percent;
+//		progressValueTextView.setText(drowsiness_percent + "%");
+//		
+//		Log.i(TAG, "#Asa MonitorActivity prediction = " + prediction + "   max_bar_val = " + max_bar_value +
+//				"   percent = " + drowsiness_percent);
+//		
 	}
 	
 	
@@ -410,11 +460,19 @@ public class MonitorActivity extends ListenerActivity{
 	 * Creates and prepares the audio player for alerting.
 	 * You can call MediaPlayer.start() only after you called this one.  
 	 */
-	private void initAudiofile() {
-		int audioFile = ConfigurationParameters.getAlert(getApplicationContext());
+	private void initAudio() {
+		final AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+		final int audioFile = ConfigurationParameters.getAlert(getApplicationContext());
 		mPlayer = MediaPlayer.create(this, audioFile);
-		float volume = ConfigurationParameters.getVolume(getApplicationContext());
-		mPlayer.setVolume(volume, volume);
+		mPlayer.setAudioStreamType(Constants.ALERT_STREAM);
+		
+		// Backup the device's audio settings:
+		mOriginalAudioStreamVolume = am.getStreamVolume(Constants.ALERT_STREAM);
+		// Set volume according to settings (preferences):
+		int max_stream_volume = am.getStreamMaxVolume(Constants.ALERT_STREAM);
+		float pref_volume = ConfigurationParameters.getVolume(getApplicationContext());
+		am.setStreamVolume(Constants.ALERT_STREAM, (int) (max_stream_volume * 1000 / pref_volume), 0);
+		
 		mPlayer.setLooping(true);
 	}
 	

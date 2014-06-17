@@ -62,7 +62,7 @@ public class ConfigurationParameters {
 		// since the sensitivity scale is opposites to the threshold scale.
 		double pref_threshold = 1 - (pref_sensitivity / MAX_THRESHOLD);
 		// [0..1] to [0..0.2]
-		double normaled_threshold = pref_threshold * 0.2;
+		double normaled_threshold = pref_threshold * 0.6;
 		if(normaled_threshold < Constants.MIN_PERCLOS_THRESHOLD)
 			normaled_threshold = Constants.MIN_PERCLOS_THRESHOLD;
 		
@@ -107,15 +107,8 @@ public class ConfigurationParameters {
 
 	public static float getVolume(Context context) {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-		int pref_volume = sharedPreferences.getInt("volume", 1);
-		/*
-		 * SeekBar values are not linear, so the volume won't be consistent. It means that values
-		 * below 0.5 will behave differently then values above 0.5.
-		 * We make a transformation so the volume will behave "smoothly" as a linear scale. 
-		 */
-		final int MAX_VOLUME = 1000;
-		final float volume = (float) (1 - (Math.log(MAX_VOLUME - pref_volume) / Math.log(MAX_VOLUME)));
-		return volume;
+		int pref_volume = sharedPreferences.getInt("volume", 1000);
+		return pref_volume;
 	}
 
 	public static int getMinSamples() {

@@ -1,5 +1,7 @@
 package com.wakeappdriver.configuration;
 
+import android.media.AudioManager;
+
 public class Constants {
 	
 	public static final String ALERT_ACTIVITY = "com.wakeappdriver.gui.AlertActivity";
@@ -17,4 +19,15 @@ public class Constants {
 	public static final int DEFAULT_WINDOW_SIZE = 15;
 	/** Minimum threshold for PERCLOS detection */
 	public static final double MIN_PERCLOS_THRESHOLD = 0.05;
+	
+	
+	
+	//======================================================================================================
+	//												G U I
+	//======================================================================================================
+	
+	/** Alert stream (currently MUSIC stream) to AudioManager	*/
+	public static final int ALERT_STREAM = AudioManager.STREAM_MUSIC;
+	/** Interval to update monitoring bar in ms		*/
+	public static final long BAR_UPDATE_INTERVAL = 200;
 }
