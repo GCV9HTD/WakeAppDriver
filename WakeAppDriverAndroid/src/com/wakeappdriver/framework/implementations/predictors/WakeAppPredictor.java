@@ -16,7 +16,11 @@ public class WakeAppPredictor implements Predictor {
 	@Override
 	public Double predictDrowsiness(HashMap<IndicatorType, Indicator> indicators) {
 		logWindowResult(indicators);
-		return indicators.get(IndicatorType.PERCLOS).getValue()*((double)10/3);
+		Double perclos_val = indicators.get(IndicatorType.PERCLOS).getValue();
+		if(perclos_val != null)
+			perclos_val = perclos_val * (double)(10/3);
+		
+		return perclos_val;
 	}
 	
 	private void logWindowResult(HashMap<IndicatorType, Indicator> indicators) {

@@ -50,7 +50,7 @@ public class MonitorActivity extends ListenerActivity{
 	/** Dialog box for warning that the monitor will stop if OK is pressed */
 	private Dialog mStopMonitorDialog;
 	
-	private double mOldPrediction;
+	private double mCurrentPrediction;
 	private double mNewPrediction;
 	Timer barTimer = new Timer();
 	
@@ -61,7 +61,7 @@ public class MonitorActivity extends ListenerActivity{
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		mOldPrediction = 0;
+		mCurrentPrediction = 0;
 		mNewPrediction = 0;
 		setLeyout();
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -86,16 +86,17 @@ public class MonitorActivity extends ListenerActivity{
 					public void run() {
 
 						// Update drowsiness bar:
-						progressBar.setCurrentValue((int) (mOldPrediction * 10000 / max_bar_value));
-						int drowsiness_percent = (int) (mOldPrediction * 100 / max_bar_value);
+						//progressBar.setCurrentValue((int) (mOldPrediction * 10000 / max_bar_value));
+						progressBar.setCurrentValue((int) (mCurrentPrediction * 10000));
+						int drowsiness_percent = (int) (mCurrentPrediction * 100);
 						// Drowsiness percent shell not be over 100, so make it 100 if it's above.
 						drowsiness_percent = drowsiness_percent > 100 ? 100 : drowsiness_percent;
 						progressValueTextView.setText(drowsiness_percent + "%");
 						
-						if((int)(mOldPrediction*100) < (int)(mNewPrediction*100))
-							mOldPrediction += 0.01;
-						else if((int)(mOldPrediction*100) > (int)(mNewPrediction*100))
-							mOldPrediction -= 0.01;
+						if((int)(mCurrentPrediction*100) < (int)(mNewPrediction*100))
+							mCurrentPrediction += 0.01;
+						else if((int)(mCurrentPrediction*100) > (int)(mNewPrediction*100))
+							mCurrentPrediction -= 0.01;
 					}
 				});
 			}
@@ -396,26 +397,14 @@ public class MonitorActivity extends ListenerActivity{
 	 * Updates the GUI drowsiness level.
 	 * @param prediction a number between [0..1] where 0 is wake and 1 is drowsy.  
 	 */
-	private void onUpdatePrediction(double prediction) {
-		if(prediction < 0){
+	private void onUpdatePrediction(Double prediction) {
+		if(prediction == null) {
 			return;
 		}
-		mOldPrediction = mNewPrediction;
+		if(prediction < 0){
+			prediction = 0.0;
+		}
 		mNewPrediction = prediction;
-//		// Update drowsiness bar:
-//		VerticalProgressBar progressBar = (VerticalProgressBar) findViewById(R.id.acd_id_progress_bar);
-//		TextView progressValueTextView = (TextView) findViewById(R.id.acd_id_progress_value);
-//		// Set maximal value of the bar as 150% of the current alert threshold.
-//		double max_bar_value = ConfigurationParameters.getAlertThreshold() * 1.5;
-//		progressBar.setCurrentValue((int) (prediction * 10000 / max_bar_value));
-//		int drowsiness_percent = (int) (prediction * 100 / max_bar_value);
-//		// Drowsiness percent shell not be over 100, so make it 100 if it's above.
-//		drowsiness_percent = drowsiness_percent > 100 ? 100 : drowsiness_percent;
-//		progressValueTextView.setText(drowsiness_percent + "%");
-//		
-//		Log.i(TAG, "#Asa MonitorActivity prediction = " + prediction + "   max_bar_val = " + max_bar_value +
-//				"   percent = " + drowsiness_percent);
-//		
 	}
 	
 	
@@ -461,7 +450,7 @@ public class MonitorActivity extends ListenerActivity{
 		boolean displayBar = ConfigurationParameters.toDisplayBar();
 		if(displayBar) {
 			setContentView(R.layout.activity_monitor_with_bar);
-			double rand_drowsiness = Math.random() * 0.01;
+			double rand_drowsiness = Math.random() * 0.1 + 0.1;
 			onUpdatePrediction(rand_drowsiness);
 		}
 		else
