@@ -129,9 +129,13 @@ public class ConfigurationParameters {
 	}
 
 	public static int getLearningModeDuration() {
-		return sharedPref.getInt("learningModeDuration", 1);
+		return sharedPref.getInt("learningModeDuration", 2);
 	}
 
+	/**
+	 * this mode is used for learning during the begining of the drive.
+	 * @param learningModeDuration - the number of windows that the system will learn the driver but won't raise alerts.
+	 */
 	public static void setLearningModeDuration(int learningModeDuration) {
 		Editor editor = sharedPref.edit();
 		editor.putInt("learningModeDuration", learningModeDuration);
