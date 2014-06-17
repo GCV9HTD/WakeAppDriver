@@ -56,19 +56,20 @@ public class ConfigurationParameters {
 
 	public static double getAlertThreshold() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-		float pref_sensitivity = sharedPreferences.getInt("sesitivity_scale", 300);
-		final int MAX_THRESHOLD = 1000;
-		// Normal pref_threshold from [0..1000] into [0..0.2]. Also set it to (1 - pref_sensitivity)
-		// since the sensitivity scale is opposites to the threshold scale.
-		double pref_threshold = 1 - (pref_sensitivity / MAX_THRESHOLD);
-		// [0..1] to [0..0.2]
-		double normaled_threshold = pref_threshold * 0.2;
-		if(normaled_threshold < Constants.MIN_PERCLOS_THRESHOLD)
-			normaled_threshold = Constants.MIN_PERCLOS_THRESHOLD;
-		
-		return normaled_threshold;
+		float pref_sensitivity = sharedPreferences.getInt("sesitivity_scale", 500);
+//		final int MAX_THRESHOLD = 1000;
+//		// Normal pref_threshold from [0..1000] into [0..0.2]. Also set it to (1 - pref_sensitivity)
+//		// since the sensitivity scale is opposites to the threshold scale.
+//		double pref_threshold = 1 - (pref_sensitivity / MAX_THRESHOLD);
+//		// [0..1] to [0..0.2]
+//		double normaled_threshold = pref_threshold * 0.2;
+//		if(normaled_threshold < Constants.MIN_PERCLOS_THRESHOLD)
+//			normaled_threshold = Constants.MIN_PERCLOS_THRESHOLD;
+//		
+//		return normaled_threshold;
+		return 0.5 + pref_sensitivity/2500;
 	}
-
+	
 	public static void setAlertThreshold(double alertThreshold) {
 		Editor editor = sharedPref.edit();
 		editor.putFloat("alertThreshold", (float)alertThreshold);
