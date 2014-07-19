@@ -36,10 +36,10 @@ public class MonitorActivity extends ListenerActivity{
 	private static final String CLASS_NAME = "MonitorActivity";
 	private static final int REQUEST_CODE = 1234;
 
-	
+
 	/** timestamp of last alert**/
 	private long lastAlert = 0;
-	
+
 	/** Dialog box for alert */
 	private Dialog mAlertDialog;
 	private MediaPlayer mPlayer;
@@ -49,11 +49,13 @@ public class MonitorActivity extends ListenerActivity{
 	private Dialog mNoIdenDialog;
 	/** Dialog box for warning that the monitor will stop if OK is pressed */
 	private Dialog mStopMonitorDialog;
-	
+
+	/** Determine whether to display the drowsiness bar or not */
+	private boolean toDisplayBar;
 	private double mCurrentPrediction;
 	private double mNewPrediction;
 	Timer barTimer = new Timer();
-	
+
 	private String drowsinessPromptMethod;
 
 
@@ -70,42 +72,40 @@ public class MonitorActivity extends ListenerActivity{
 		initAudio();
 		initNoIdentDialog();
 		initStopMonitorDialog();
-		
+
 		final Handler barHandler = new Handler();
 
-		barTimer.scheduleAtFixedRate(new TimerTask(){
+		if(toDisplayBar) {
+			barTimer.scheduleAtFixedRate(new TimerTask(){
 
-			@Override
-			public void run() {
-				barHandler.post(new Runnable() {
-					VerticalProgressBar progressBar = (VerticalProgressBar) findViewById(R.id.acd_id_progress_bar);
-					TextView progressValueTextView = (TextView) findViewById(R.id.acd_id_progress_value);
-					// Set maximal value of the bar as 150% of the current alert threshold.
-					double max_bar_value = ConfigurationParameters.getAlertThreshold() * 1.5;
-					@Override
-					public void run() {
+				@Override
+				public void run() {
+					barHandler.post(new Runnable() {
+						VerticalProgressBar progressBar = (VerticalProgressBar) findViewById(R.id.acd_id_progress_bar);
+						TextView progressValueTextView = (TextView) findViewById(R.id.acd_id_progress_value);
+						// Set maximal value of the bar as 150% of the current alert threshold.
+						@Override
+						public void run() {
+							// Update drowsiness bar:
+							//progressBar.setCurrentValue((int) (mOldPrediction * 10000 / max_bar_value));
+							int drowsinessPercent = (int) (mCurrentPrediction * 100);
+							progressBar.setCurrentValue(drowsinessPercent*100);
+							progressBar.setCurrentValue((int) (mCurrentPrediction * 10000));
+							// Drowsiness percent shell not be over 100, so make it 100 if it's above.
+							drowsinessPercent = drowsinessPercent > 100 ? 100 : drowsinessPercent;
+							progressValueTextView.setText(drowsinessPercent + "%");
 
-						// Update drowsiness bar:
-						//progressBar.setCurrentValue((int) (mOldPrediction * 10000 / max_bar_value));
-						int drowsinessPercent = (int) (mCurrentPrediction * 100);
-						progressBar.setCurrentValue(drowsinessPercent*100);
-						progressBar.setCurrentValue((int) (mCurrentPrediction * 10000));
-						int drowsiness_percent = (int) (mCurrentPrediction * 100);
-						// Drowsiness percent shell not be over 100, so make it 100 if it's above.
-						drowsinessPercent = drowsinessPercent > 100 ? 100 : drowsinessPercent;
-						progressValueTextView.setText(drowsinessPercent + "%");
-						
-						if((int)(mCurrentPrediction*100) < (int)(mNewPrediction*100))
-							mCurrentPrediction += 0.01;
-						else if((int)(mCurrentPrediction*100) > (int)(mNewPrediction*100))
-							mCurrentPrediction -= 0.01;
-					}
-				});
-			}
-		}, Constants.BAR_UPDATE_INTERVAL, Constants.BAR_UPDATE_INTERVAL);
-		
+							if((int)(mCurrentPrediction*100) < (int)(mNewPrediction*100))
+								mCurrentPrediction += 0.01;
+							else if((int)(mCurrentPrediction*100) > (int)(mNewPrediction*100))
+								mCurrentPrediction -= 0.01;
+						}
+					});
+				}
+			}, Constants.BAR_UPDATE_INTERVAL, Constants.BAR_UPDATE_INTERVAL);
+		}
 		this.drowsinessPromptMethod = ConfigurationParameters.getDrowsinessPromptMethod();
-		
+
 	}
 
 
@@ -122,7 +122,7 @@ public class MonitorActivity extends ListenerActivity{
 		mStopMonitorDialog.show();
 	}
 
-	
+
 
 	/**
 	 * Stops the monitoring process. 
@@ -139,10 +139,10 @@ public class MonitorActivity extends ListenerActivity{
 		// Restore device's audio settings:
 		final AudioManager am = (AudioManager) getSystemService(AUDIO_SERVICE);
 		am.setStreamVolume(Constants.ALERT_STREAM, mOriginalAudioStreamVolume, 0);
-		
+
 		// Stop bar update
 		barTimer.cancel();
-		
+
 		// Go to startScreen activity
 		Intent intent = new Intent(this, StartScreenActivity.class);
 		startActivity(intent);
@@ -171,7 +171,7 @@ public class MonitorActivity extends ListenerActivity{
 		 * as an extra data to the action UPDATE_PREDICTION.
 		 */
 		System.out.println(CLASS_NAME + ": got action " + intent.getAction());
-		
+
 		switch(Action.toAction(intent.getAction())){
 
 		case WAD_ACTION_UPDATE_PREDICITON:
@@ -210,12 +210,12 @@ public class MonitorActivity extends ListenerActivity{
 			return;
 		}
 		this.lastAlert = timestamp;
-		
+
 		Log.d(TAG, CLASS_NAME + ": starting alert");
 		mAlertDialog.show();
 		mPlayer.start();
 	}
-	
+
 	/**
 	 * Stops alerting.
 	 * NOTE: This must be public for now, to enable the OK button to call it
@@ -241,7 +241,7 @@ public class MonitorActivity extends ListenerActivity{
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Starts a Voice Recognition to get the drowsiness level and updating the Shared Preferences variable drowsinessLevel
 	 */
@@ -259,23 +259,23 @@ public class MonitorActivity extends ListenerActivity{
 				intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
 						"WakeAppDriver Voice Recognition");
 				startActivityForResult(intent, REQUEST_CODE);
-				
+
 				//starting voice activity, setting delay of few seconds to turn it off in case of error
 				Handler handler=new Handler();
 				Runnable r=new Runnable()
 				{
-				    public void run() 
-				    {
-				    	finishActivity(REQUEST_CODE); 			
-				    }
+					public void run() 
+					{
+						finishActivity(REQUEST_CODE); 			
+					}
 				};
 				handler.postDelayed(r, 8000);
-				
+
 			}
 		});
 
 	}
-	
+
 	/**
 	 * get the result from the voice recognition activity and save it
 	 */
@@ -306,8 +306,8 @@ public class MonitorActivity extends ListenerActivity{
 			this.finishActivity(REQUEST_CODE);
 		}
 	}
-	
-	
+
+
 
 	/**
 	 * When the driver's face & eyes cannot be identified.
@@ -316,8 +316,8 @@ public class MonitorActivity extends ListenerActivity{
 		Log.d(TAG, CLASS_NAME + ": onNoIdent start");
 		// First, stop the GoService
 		this.stopService(GoService.class);
-		
-	    mNoIdenDialog.show();
+
+		mNoIdenDialog.show();
 	}
 
 
@@ -347,10 +347,10 @@ public class MonitorActivity extends ListenerActivity{
 
 		});
 		b.setCancelable(false);
-		
+
 		mNoIdenDialog = b.create();
 	}
-	
+
 	/**
 	 * Starts a Voice Recognition / GUI screen to get the drowsiness level and updating the Shared Preferences variable drowsinessLevel
 	 */
@@ -362,34 +362,34 @@ public class MonitorActivity extends ListenerActivity{
 			getDrowsinessLevelFromGui();
 		}
 	}
-	
+
 	private void getDrowsinessLevelFromGui(){
 		AlertDialog.Builder b = new Builder(this);
-	    b.setTitle("Your Drowsiness Level");
-	    String[] types = {"1", "2","3","4","5","6","7","8","9","10"};
-	    b.setItems(types, new OnClickListener() {
+		b.setTitle("Your Drowsiness Level");
+		String[] types = {"1", "2","3","4","5","6","7","8","9","10"};
+		b.setItems(types, new OnClickListener() {
 
-	        @Override
-	        public void onClick(DialogInterface dialog, int which) {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
 
-	            dialog.dismiss();
-	            if(which >=0 && which <10){
-	            	ConfigurationParameters.setDrowsinessLevel(which + 1);
-	            }
-	        }
+				dialog.dismiss();
+				if(which >=0 && which <10){
+					ConfigurationParameters.setDrowsinessLevel(which + 1);
+				}
+			}
 
-	    });
-	    final AlertDialog alertDialog = b.create();
-	    b.show().getListView().setSelection(3);
-		
-	    //Remove the dialog after few seconds
-	    Handler handler=new Handler();
+		});
+		final AlertDialog alertDialog = b.create();
+		b.show().getListView().setSelection(3);
+
+		//Remove the dialog after few seconds
+		Handler handler=new Handler();
 		Runnable r=new Runnable()
 		{
-		    public void run() 
-		    {
-		    	alertDialog.dismiss();		
-		    }
+			public void run() 
+			{
+				alertDialog.dismiss();		
+			}
 		};
 		handler.postDelayed(r, 8000);
 	}
@@ -405,15 +405,15 @@ public class MonitorActivity extends ListenerActivity{
 		}
 		mNewPrediction = prediction;
 	}
-	
-	
+
+
 	private void startGoService() {
 		Context context = getApplicationContext();
 		Intent intent = new Intent(context, GoService.class);
 		context.startService(intent);
 	}
-	
-	
+
+
 	/**
 	 * Creates and prepares alert dialog box (you can call AlertDialog.show() after
 	 * this method finished). 
@@ -425,7 +425,7 @@ public class MonitorActivity extends ListenerActivity{
 		mAlertDialog.setCanceledOnTouchOutside(false);
 	}
 
-	
+
 	private void initStopMonitorDialog() {
 		Builder b = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
 		b.setTitle(R.string.dialog_stop_monitoring_title);
@@ -446,8 +446,8 @@ public class MonitorActivity extends ListenerActivity{
 	 */
 	private void setLeyout() {
 		// Decide which activity layout to show, according to "display bar" setting
-		boolean displayBar = ConfigurationParameters.toDisplayBar();
-		if(displayBar) {
+		this.toDisplayBar = ConfigurationParameters.toDisplayBar();
+		if(toDisplayBar) {
 			setContentView(R.layout.activity_monitor_with_bar);
 			double rand_drowsiness = Math.random() * 0.1 + 0.1;
 			onUpdatePrediction(rand_drowsiness);
@@ -465,22 +465,22 @@ public class MonitorActivity extends ListenerActivity{
 		final int audioFile = ConfigurationParameters.getAlert(getApplicationContext());
 		mPlayer = MediaPlayer.create(this, audioFile);
 		mPlayer.setAudioStreamType(Constants.ALERT_STREAM);
-		
+
 		// Backup the device's audio settings:
 		mOriginalAudioStreamVolume = am.getStreamVolume(Constants.ALERT_STREAM);
 		// Set volume according to settings (preferences):
 		float pref_volume = ConfigurationParameters.getVolume(getApplicationContext());
 		am.setStreamVolume(Constants.ALERT_STREAM, (int) pref_volume, 0);
-		
+
 		mPlayer.setLooping(true);
 	}
-	
-	
+
+
 	private void stopService(Class<?> service) {
 		try{
-		Context context = this;
-		Intent intent = new Intent(this, service);
-		context.stopService(intent);
+			Context context = this;
+			Intent intent = new Intent(this, service);
+			context.stopService(intent);
 		}
 		catch(Exception e) {
 			Log.e(TAG, CLASS_NAME + ": stopService error: " + e.getStackTrace());
