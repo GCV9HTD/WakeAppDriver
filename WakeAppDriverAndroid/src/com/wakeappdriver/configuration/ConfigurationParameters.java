@@ -45,7 +45,11 @@ public class ConfigurationParameters {
 	}
 
 	public static int getMaxFrameQueueSize() {
-		return sharedPref.getInt("maxFrameQueueSize", 20);
+		try{
+			return sharedPref.getInt("maxFrameQueueSize", 20);
+		} catch (Exception e) {
+			return 20;
+		}
 	}
 
 	public static void setMaxFrameQueueSize(int maxFrameQueueSize) {
@@ -103,7 +107,11 @@ public class ConfigurationParameters {
 	}
 
 	public static int getMinSamples() {
-		return sharedPref.getInt("minSamples", 50);
+		try{
+			return sharedPref.getInt("minSamples", 50);
+		} catch (Exception e) {
+			return 50;
+		}
 	}
 
 	public static void setMinSamples(int minSamples) {
@@ -157,7 +165,12 @@ public class ConfigurationParameters {
 	}
 
 	public static double getBlinkLimit() {
-		return sharedPref.getFloat("blinkLimit", (float) 0.4);
+		try{
+			
+			return sharedPref.getFloat("blinkLimit", (float) 0.4);
+		} catch (Exception e) {
+			return 0.4;
+		}
 	}
 
 	public static void setBlinkLimit(double blinkLimit) {

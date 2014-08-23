@@ -29,8 +29,6 @@ import com.wakeappdriver.framework.datacollection.CsvFileWriter;
 import com.wakeappdriver.framework.datacollection.DataCollector;
 import com.wakeappdriver.framework.datacollection.FtpSender;
 import com.wakeappdriver.framework.dto.CapturedFrame;
-import com.wakeappdriver.framework.implementations.alerters.SimpleAlerter;
-import com.wakeappdriver.framework.implementations.alerters.SpeechAlerter;
 import com.wakeappdriver.framework.implementations.analyzers.PercentCoveredFrameAnalyzer;
 import com.wakeappdriver.framework.implementations.indicators.BlinkDurationIndicator;
 import com.wakeappdriver.framework.implementations.indicators.PerclosIndicator;
